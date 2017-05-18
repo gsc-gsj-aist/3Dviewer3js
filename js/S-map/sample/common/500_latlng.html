@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!-- 500_latlng.html, S-mapサンプル - 地理座標－ピクセル座標変換
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="initial-scale=1, user-scalable=no" />
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>地理座標－ピクセル座標変換</h1>
+	<h3></h3>
+	<h4>・スケール(メートル/ピクセル) Smap.zoomToScale( p, z )</h4>
+	<div id="out0"></div>
+	<h4>・Smap.latLngToPoint( { lat: 35.360628, lng: 138.727365 }, z )</h4>
+	<div id="out1"></div>
+	<h4>・Smap.pointToLatLng( p, z )</h4>
+	<div id="out2"></div>
+<script>
+
+'use strict';
+
+( function() {
+
+	calc( { lat: 35.360628, lng: 138.727365 }, 10 );
+
+	function calc( latLng, z ) {
+		var
+			p = Smap.latLngToPoint( latLng, z ),
+			ll= Smap.pointToLatLng( p, z ),
+			scale = Smap.zoomToScale( z, ll.lat ),
+			s;
+		console.log( p );
+		s = '<h3>富士山 { lat: ' + latLng.lat + ', lng: ' + latLng.lng + ' }, z = ' + z;
+		document.getElementsByTagName( 'h3' )[0].innerHTML = s;
+
+		document.getElementById( 'out0' ).innerHTML = scale;
+		
+		s = 'Pint x: ' + p.x + ' y: ' + p.y + '<br />';
+		s += 'TILE x: ' + Math.floor( p.x / 256 ) + ', y: ' + Math.floor( p.y / 256 );
+		s += '  i: ' + p.x % 256 + ' j: ' + p.y % 256;
+		document.getElementById( 'out1' ).innerHTML = s;
+		
+		s = 'lat: '+ ll.lat + ' lng: ' + ll.lng;
+		document.getElementById( 'out2' ).innerHTML = s;
+	}
+
+} )();
+
+
+</script>
+</body>
+</html>

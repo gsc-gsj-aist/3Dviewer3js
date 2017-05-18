@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!-- leaflet020_simple.html, S-mapサンプル - マーカーとポップアップ
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - ポップアップ</title>
+	<style>
+body { margin:0px; }
+#map {
+	position: absolute;
+	top:90px; bottom: 0px; left: 0px; right: 0px;
+}
+h1 { font-size: 16pt; }
+	</style>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>S-mapサンプル - マーカーとポップアップ</h1>
+	<input type="checkbox" id="marker" checked="checked">マーカー</input>
+	<input type="checkbox" id="popup" checked="checked">ポップアップ</input>
+	<div>マーカーはドラッグ可能です</div>
+	<div id="map"></div>
+	<script>
+
+'use strict';
+	
+( function() {
+
+	var
+		map, marker, popup;
+
+	map = Smap.map( {
+		owner: 'map',
+		center: { lat: 35.3606, lng: 138.7273 },
+		zoom: 7,
+	} );
+
+	addMarker();
+//	popup = map.addPopup( { lat: 35.3606, lng: 138.7273 }, '富士山' );
+	popup = map.add( { latLng: [ 35.3606, 138.7273 ], content: '富士山' } );
+
+	function addMarker() {
+		marker = map.addMarker( 
+			{ lat: 36.225278, lng: 140.106667 },
+			{
+				popup: '<h2>筑波山</h2><hr /><p>標高877m</p>',
+				icon: {
+					url: 'https://gbank.gsj.jp/volcano/Quat_Vol/kml/icon.png',
+					anchor: { x: 32, y: 32 },
+				},
+				title: '筑波山',
+				draggable: true
+			} 
+		);
+//		console.log( marker.setPopup( 'つくばさん' ) );
+		marker.openPopup();
+//		marker.closePopup();
+		marker.on( 'dragend', function( event ) {
+			console.log( 'dragend, distance: ' + event.distance );
+		} );
+	}
+//	marker.setVisibility( false );
+//	marker.setVisibility( true );
+	
+	document.getElementById( 'marker' ).addEventListener( 'click', function( event ) {
+		if ( this.checked ) {
+			addMarker();
+		} else {
+			map.remove( marker );
+// 			以下の表現も可
+//			map.removeMarker( marker );
+		}
+	} );
+
+	document.getElementById( 'popup' ).addEventListener( 'click', function( event ) {
+		if ( this.checked ) {
+			popup = map.addPopup( { lat: 35.3606, lng: 138.7273 }, '富士山' );
+		} else {
+//			map.remove( popup );
+// 			以下の表現も可
+//			map.removePopup( popup );
+			map.removePopup();
+		}
+	} );
+
+} )();
+
+	</script>
+</body>
+</html>
+
+

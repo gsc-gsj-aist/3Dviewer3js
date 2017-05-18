@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!-- 530_base64url.html, S-mapサンプル - base64urlエンコード，デコード
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="initial-scale=1, user-scalable=no" />
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>S-mapサンプル - base64urlエンコード，デコード</h1>
+	<h4>・入力データ ... data</h4>
+	<div id="out0"></div>
+	<h4>・エンコード ... s = Smap.base64url.encode( data )</h4>
+	<div id="out1"></div>
+	<h4>・デコード ... Smap.base64url.decode( s )</h4>
+	<div id="out2"></div>
+<script>
+
+'use strict';
+
+( function() {
+	var
+		data = [ 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 ],
+		s1 = Smap.base64url.encode( data ),
+		s2 = Smap.base64url.decode( s1 ) ;
+
+	document.getElementById( 'out0' ).innerHTML = data;
+	document.getElementById( 'out1' ).innerHTML = s1;
+	document.getElementById( 'out2' ).innerHTML = s2;
+
+} )();
+
+
+</script>
+</body>
+</html>

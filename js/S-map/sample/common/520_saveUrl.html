@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<!-- 520_simple.html, S-mapサンプル - 地図画像をPNGやKMZへ保存
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+　JSZip.jsが必要
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - 地図画像をPNGやKMZへ保存</title>
+	<script src="../lib/jszip/jszip.min.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>S-mapサンプル - 地図画像をPNGやKMZへ保存</h1>
+	<!-- img要素ではcrossOrigin属性を指定する必要があります -->
+	<img id="img" crossOrigin="Anonymous"
+			src="https://gbank.gsj.jp/seamless/tilemap/detailed/glfn/11/802/1816.png" />
+	<br />
+	<button id="savePng">PNGファイルへ保存</button>
+	ファイル名 <input type="text" id="filename1" value="noname.png" />
+	<br />
+	<button id="saveKmz">KMZファイルへ保存</button>
+	ファイル名 <input type="text" id="filename2" value="noname.kmz" />
+	KML内名称 <input type="text" id="overlayname" value="マップ" />
+	<script>
+
+'use strict';
+
+( function() {
+
+	document.getElementById( 'savePng' ).addEventListener( 'click', function( event ) {
+		var
+			img = document.getElementById( 'img' ),
+			canvas = document.createElement( 'canvas' );
+
+		console.log( img.src );
+		canvas.width = img.width;
+		canvas.height = img.height;
+		canvas.getContext( '2d' ).drawImage( img, 0, 0 );
+		// ファイル名を変えるなどの処理が必要がなければ第1引数にそのままURL渡せばよい
+		Smap.saveURL( canvas.toDataURL(), document.getElementById( 'filename1' ).value );
+	} );
+
+	document.getElementById( 'saveKmz' ).addEventListener( 'click', function( event ) {
+		var
+			img = document.getElementById( 'img' ),
+			canvas = document.createElement( 'canvas' ),
+			bounds = Smap.bounds( [ 39, 139 ], [ 40, 140 ] ),
+			name =  document.getElementById( 'overlayname' ).value;
+
+		canvas.width = img.width;
+		canvas.height = img.height;
+		canvas.getContext( '2d' ).drawImage( img, 0, 0 );
+		Smap.mapToKMZ( canvas, bounds, document.getElementById( 'filename2' ).value, { name: name} );
+	} );
+
+} )();
+
+	</script>
+</body>
+</html>

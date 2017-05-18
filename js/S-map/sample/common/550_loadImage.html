@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<!-- 550_loadImage.html, S-mapサンプル - 画像ファイルの読み込み
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - 画像ファイルの読み込み</title>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>S-mapサンプル - 画像ファイルの読み込み</h1>
+
+	<h3>画像読み込み</h3>
+	<div>Smap.promiseFinishing()を使って2枚の画像を読み込み，重ね合わせ</div>
+	<canvas id="canvas1" width="256" height="256"></canvas>
+	<script>
+
+'use strict';
+
+( function() {
+
+	var
+		promise1,
+		promise2,
+		imgsrc1 = 'http://cyberjapandata.gsi.go.jp/xyz/std/11/1816/802.png',
+		imgsrc2 = 'https://gbank.gsj.jp/seamless/tilemap/detailed/glfn/11/802/1816.png',
+		ctx = document.getElementById( 'canvas1' ).getContext( '2d' );
+
+	// 画像のロード
+	promise1 = Smap.loadImage( imgsrc1 );
+
+	// プロミスの自作: Smap.promise()を使って画像ロードを自作するサンプル
+	// この例の場合自作しなければならないわけではない
+	promise2 = Smap.promise( function( resolve, reject ) {
+		var
+			img = new Image();
+		img.crossOrigin = 'anonymous';
+		img.onload = function() {
+			resolve( this );			// 成功時にはresolve()をコール
+		};
+		img.onerror = function() {
+			reject( this );				// 失敗時にはreject()をコール
+		}
+		img.src = imgsrc2;
+	} );
+
+	// promiseFinishingの利用: すべてが完了したら成功するプロミス
+	Smap.promiseFinishing( promise1, promise2 ).then( function( data ) {
+		ctx.drawImage( data[0], 0, 0 );
+		ctx.globalAlpha = 0.7;
+		ctx.drawImage( data[1], 0, 0 );
+	} );	
+
+} )();
+
+	</script>
+</body>
+</html>

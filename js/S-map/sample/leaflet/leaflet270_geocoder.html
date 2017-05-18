@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<!-- leaflet270_simple.html, S-mapサンプル - ジオコーディング
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - ジオコーディング</title>
+	<style>
+html, body { margin: 0px; width: 100%; height: 100% }
+#map {
+	position: absolute;
+	top: 0px;
+	left: 230px;
+	bottom: 0px;
+	right: 0px;
+}
+#side {
+	padding: 5px;
+}
+h1 {
+	font-size: 16px;
+}
+	</style>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<div id='map'></div>
+	<div id='side'>
+		<h1>S-mapサンプル</h1>
+		<h1>ジオコーディング</h1>
+		<input id="addr" value="筑波山" />
+		<button id="search">検索</button>
+	</div>
+	<script>
+
+'use strict';
+
+( function() {
+	var
+		map,
+		geocoder = Smap.geocoder( [ null ] );	// nullを指定するとデフォルトジオコーダ
+
+	map = Smap.map( {
+		owner: 'map',
+ 		center: { lat: 35.3606, lng: 138.7274 },
+      	zoom: 8
+	} ),
+
+	geocoder.add( function( addr, params ) {
+			//	関数を指定するとgeocodeメソッドのオーバーライド
+			//	以下は検索自体は行わず，たた2地点を返す例
+		var
+			p,
+			results = [],
+			bounds = ( params ) ? params.bounds: null,
+			data = [
+				{ title: 'テスト1', latLng: { lat:38, lng: 140 } },
+				{ title: 'テスト2', latLng: { lat:37, lng: 141 } }
+			];
+
+		data.forEach( function( d ) {
+			if ( !bounds || Smap.contains( bounds, d.latLng ) ) {
+				results.push( d ) 
+			}
+		} );
+		p = Smap.promise( function( resolve, reject ) {
+			resolve( { results: results } );
+		} );
+		return p
+	} );
+
+	document.getElementById( 'search' ).addEventListener( 'click', function() {
+		search( document.getElementById( 'addr' ).value );
+	} );
+
+	function search( addr ) {
+		var
+			promise;
+
+		promise = geocoder.geocode( addr, { bounds: [ [20,122], [46,154] ] } );
+				//日本に限定
+		promise.then( function( data ) {
+			var
+				sw = Smap.latLng(  90,  180 ),
+				ne =Smap.latLng( -90, -180 );
+			map.removeMarker();
+			data.results.forEach( function( result ) {
+				sw.lat = Math.min( sw.lat, result.latLng.lat );
+				sw.lng = Math.min( sw.lng, result.latLng.lng );
+				ne.lat = Math.max( ne.lat, result.latLng.lat );
+				ne.lng = Math.max( ne.lng, result.latLng.lng );
+				map.addMarker( result.latLng, { popup: result.title } );
+			} );
+			map.setBounds( [ sw, ne ] ); 
+		} );
+	}
+
+} )();
+
+	</script>
+</body>
+</html>

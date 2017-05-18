@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<!-- cesium080_base.html, S-mapサンプル - 背景レイヤー
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - 背景レイヤー</title>
+	<style>
+html, body { margin: 0px; width: 100%; height: 100% }
+#map {
+	margin: 0px; width: 100%; height: 400px 
+}
+	</style>
+	<link rel="stylesheet" href="http://cesiumjs.org/releases/1.24/Widgets/widgets.css"/>
+	<script src="http://cesiumjs.org/releases/1.24/Cesium.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>S-mapサンプル - 背景レイヤー</h1>
+	<button id="all">全レイヤー検索</button>
+	<button id="del">Open Street Mapを削除</button>
+	<div id="base">
+		<input name="base" type="radio" id="CHIRIIN_STD">地理院地図</input>
+		<input name="base" type="radio" id="BLANK_MAP">無色の背景</input>
+		<input name="base" type="radio" id="Shashin">地理院タイル（写真）</input>
+		<input name="base" type="radio" id="OpenStreetMap" checked="checked">Open Street Map</input>
+	</div>
+	<div id="out"></div>
+	<div id="map"></div>
+	<script>
+
+'use strict';
+
+( function() {
+
+	var
+		map,
+		osm;
+
+	// Smap.map()のパラメータオブジェクトで指定
+	map = Smap.map( {
+		engine: 'cesium',
+		owner: 'map',
+		bases: [ Smap.DEFAULT_BASE,  Smap.BLANK_MAP, {
+//		bases: [ Smap.DEFAULT_BASE, {
+			id: 'Shashin',
+			url: 'http://cyberjapandata.gsi.go.jp/xyz/ort/{z}/{x}/{y}.jpg',
+			title: '地理院タイル（写真）',
+			attribution: '国土地理院',
+			attribution_url: 'http://maps.gsi.go.jp/development/ichiran.html',
+			minZoom: 0,
+		} ],
+		center: { lat: 34.637, lng: 137.409 },
+ 		maxZoom: 13,
+		zoom: 8,
+	} );
+
+	// BLANK_MAPはfillStyleで色が変えられます．
+	map.setBase( 'BLANK_MAP' ).fillStyle = '#ffffcc';
+
+	// addBase()で追加
+	map.addBase( {
+		id: 'OpenStreetMap',
+		url: 'http://tile.openstreetmap.org/{z}/{x}/{y}.png',
+		title: 'Open Street Map',
+		attribution: 'Open Street Map',
+		attribution_url: 'http://osm.jp/',
+		minZoom: 0,
+		maxZoom: 13,
+	} );
+
+// 以下の表現も可能
+/*
+	map.add( {
+		id: 'OpenStreetMap',
+		url: 'http://tile.openstreetmap.org/{z}/{x}/{y}.png',
+		title: 'Open Street Map',
+		attribution: 'Open Street Map',
+		attribution_url: 'http://osm.jp/',
+		minZoom: 0,
+		maxZoom: 13,
+		base: true
+	} );
+*/
+
+	var
+		nl = Array.prototype.slice.call( document.querySelectorAll( 'input' ) );
+
+	nl.forEach( function( input ) {
+		input.addEventListener( 'click', function( event ) {
+			var
+				layer,
+				s;
+
+			// setBase()を使って背景地図を ipunt.id に変更
+			map.setBase( input.id );
+
+			// setBase()を引数なしで実行すると現在の背景を返す
+			layer = map.setBase();
+			s = '現在の背景レイヤーを取得: setBase()<br />';
+			s += '　id: ' + layer.id + ', title: ' + layer.title + '<br />';
+			document.getElementById( 'out' ).innerHTML = s;
+		} );
+	} );
+
+
+	document.getElementById( 'all' ).addEventListener( 'click', function( event ) {
+		showBases();
+/*		var
+			s = '引数を省略して全ての背景レイヤーを取得: findBase()<br />';
+	
+		map.findBase().forEach( function( layer ) {
+			s += '　id: ' + layer.id + ', title: ' + layer.title + '<br />';
+		} );
+		document.getElementById( 'out' ).innerHTML = s;
+*/
+	} );
+	
+	document.getElementById( 'del' ).addEventListener( 'click', function( event ) {
+//		背景レイヤーを削除するとき　removeBase()
+		map.removeBase( 'OpenStreetMap' );
+		// 2014-09-30　削除されない??
+//  	以下の表現も可能
+//		map.remove( map.findBase( 'OpenAerialTiles' ) );
+
+		showBases();
+	} );
+
+	function showBases() {
+		var
+			s = '引数を省略して全ての背景レイヤーを取得: findBase()<br />';
+	
+		map.findBase().forEach( function( layer ) {
+			s += '　id: ' + layer.id + ', title: ' + layer.title + '<br />';
+		} );
+		document.getElementById( 'out' ).innerHTML = s;
+	}
+
+} )();
+
+	</script>
+</body>
+</html>

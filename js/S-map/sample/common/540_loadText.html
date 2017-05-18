@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!-- 540_loadText.html, S-mapサンプル - テキストファイルの読み込み
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - テキストファイルの読み込み</title>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>S-mapサンプル - テキストファイルの読み込み</h1>
+
+	<h3>テキストファイル読み込み</h3>
+	<div id="out1"></div>
+	<div id="out2"></div>
+
+	<h3>JSONファイル読み込み</h3>
+	<div id="out3"></div>
+
+	<h3>CSVファイル読み込み</h3>
+	<div id="out4"></div>
+
+	<script>
+
+'use strict';
+
+( function() {
+
+	var
+		jsonsrc = 'https://gbank.gsj.jp/seamless/legend/detailed.json',
+		csvsrc = 'https://gbank.gsj.jp/seamless/legend/detailed.csv';
+
+	// テキストロード
+	Smap.loadText( jsonsrc ).then( 
+	// thenメソッドはさらにプロミスを返します．
+		function( text ) { // 成功時の処理
+			document.getElementById( 'out1' ).innerHTML = '結果: ' + text.slice( 0, 40 );
+		},
+		function( error ) { // 失敗時の処理
+			document.getElementById( 'out1' ).innerHTML = error.msg;
+		}
+	).then( function() {
+		// thenメソッドはさらに新しいプロミスを返すのでメソッドチェーンでつなげられます．
+		// 以下は，成功か失敗かによらず実行されます
+		document.getElementById( 'out2' ).innerHTML = 'テキストファイル読み込み完了（成功 or 失敗）';
+	} );
+
+	// JSONロード
+	Smap.loadJSON( jsonsrc ).then( function( data ) {
+		document.getElementById( 'out3' ).innerHTML = '結果: ' + data.title;
+	} );
+
+	// CSVロード
+	Smap.loadCSV( csvsrc, '\t' ).then( function( data ) {
+		document.getElementById( 'out4' ).innerHTML = '結果: ' + data[0];
+	} )
+
+} )();
+
+	</script>
+</body>
+</html>

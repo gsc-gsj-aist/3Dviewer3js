@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<!-- leaflet180_simple.html, S-mapサンプル - ポリラインとポリゴンを描画
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - ポリラインとポリゴンを描画</title>
+	<style>
+body { margin:0px; }
+#map {
+	position: absolute;
+	top:80px; bottom: 0px; left: 0px; right: 0px;
+}
+h1 { font-size: 16pt; }
+	</style>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>S-mapサンプル - ポリラインを描画</h1>
+	<button id="hide">polyline1: setVisibility</button>
+	<button id="remove">polyline2: remove</button>
+	<span>please click green polygon !</span>
+	<div id="map"></div>
+	<script>
+
+'use strict';
+
+( function() {
+
+	var
+		map,
+		polyline1,
+		polyline2,
+		polyline3;
+
+	map = Smap.map( {
+		owner: 'map',
+		center: { lat: 35.3606, lng: 138.7273 },
+		zoom: 8,
+	} );
+
+	// 点だけを指定した場合，最後は閉じず，黒色の線を描く
+	polyline1 = map.add( { latLngs: [
+	    [ 35,   137 ],
+    	[ 35,   138 ],
+    	[ 35.8, 138 ]
+	] } );
+
+	// 2番目の引数で閉じるかいなか，3番目の引数でスタイルを指定
+	// 点はlatLngオブジェクトで表現することもできる
+	polyline2 = map.addPolyline( [
+	    { lat: 35,   lng: 138 },
+	    { lat: 35,   lng: 139 },
+	    { lat: 35.8, lng: 139 }
+	], false, { stroke: 'red', strokeOpacity: 0.5, strokeWidth: 5 } );
+
+	// 引数をまとめてオブジェクトとして設定することもできる
+	polyline3 = map.addPolyline( { latLngs: [
+	    [35,   139],
+    	[35,   140],
+    	[35.8, 140]
+	], close: true, style: { color: 'blue', fillColor: 'green', fillOpacity: 0.7 } } );
+	
+	// onメソッドでイベントハンドラを登録できる
+	polyline3.on( 'click', function( event ) {
+		map.addPopup( event.latlng, '緑ポリゴン' );
+	} );
+
+	// setVisibility()メソッドまたはset( 'visibility', value )で表示・非表示切り替え
+	document.getElementById( 'hide' ).addEventListener( 'click', function() {
+		polyline1.setVisibility( !polyline1.setVisibility() );
+		// 以下の表現も可能
+		// polyline1.set( 'visibility', !polyline1.setVisibility() )
+	} );
+
+	// map.remove()メソッドで削除
+	document.getElementById( 'remove' ).addEventListener( 'click', function() {
+		map.remove( polyline2 );
+		// 以下の表現も可能
+		//  map.removePolyline( polyline );
+	} );
+
+} )();
+
+	</script>
+</body>
+</html>
+
+

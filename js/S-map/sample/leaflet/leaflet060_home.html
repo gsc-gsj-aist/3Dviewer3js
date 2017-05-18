@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<!-- leaflet060_simple.html, S-mapサンプル - ホームの設定と移動
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - ホームの設定と移動</title>
+	<style>
+html, body { margin: 0px; width: 100%; height: 100% }
+#map { width: 600px; height: 400px }
+	</style>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>ホームの設定と移動</h1>
+	<button id="home">ホームに移動</button>
+	<button id="sethome">現在の状態をホームに設定</button>
+	<br />
+	<div id="map"></div>
+	<script>
+
+'use strict';
+
+( function() {
+
+	var
+		map = Smap.map( {
+			owner: 'map', 
+			zoom: 5,
+			minZoom: 5,
+			maxZoom: 13,
+	 		center: { lat: 35.3606, lng: 138.7274 },
+//			ホームはmap生成時に指定することもできます
+//			生成時に指定がない場合，その時のcenter,zoomの値となります
+//	 		home: { center: { lat: 36, lng: 140}, zoom: 10 }
+		} );
+
+	document.getElementById( 'home'　).addEventListener( 'click', function() {
+		// reset()メソッドはビューをホームに変更します
+		map.reset();
+	} );
+
+	document.getElementById( 'sethome'　).addEventListener( 'click', function() {
+		// setHome()メソッドはホームを指定したビューに変更します
+		map.setHome( map.setView() );
+	} );
+
+} )();
+
+	</script>
+</body>
+</html>

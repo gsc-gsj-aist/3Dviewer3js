@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<!-- leaflet240_simple.html, S-mapサンプル - 各種コントロール
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - 各種コントロール</title>
+	<style>
+body { margin:0px; }
+#map {
+	position: absolute;
+	top:80px; bottom: 0px; left: 0px; right: 0px;
+}
+h1 { font-size: 16pt; }
+.my-control1 {
+	width: 150px;
+	height: 50px;
+	background: #ffffdd;
+}
+#my-control2 {
+	width: 150px;
+	height: 50px;
+	background: white;
+}
+	</style>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>S-mapサンプル - 各種コントロール</h1>
+	<input type="checkbox" id="scaleControl" checked="checked">スケールコントロール</input>
+	<input type="checkbox" id="layerControl">レイヤーコントール</input>
+	<input type="checkbox" id="attributionControl" checked="checked">アトリビューションコントール (右上)</input>
+	<input type="checkbox" id="zoomControl">ズームコントール (右上)</input>
+	<input type="checkbox" id="myControl1" checked="checked">自作コントール1</input>
+	<div id="map"></div>
+	<div id="my-control2">自作コントロール2</div>
+	<script>
+
+'use strict';
+
+( function() {
+
+	var
+		map, marker;
+
+	map = Smap.map( {
+		owner: 'map',
+		center: { lat: 35.3606, lng: 138.7273 },
+		zoom: 7,
+    	//	controlsを指定すると使用するコントロールを変更できます
+    	//	デフォルトの設定は　[ 'attribution', 'scale', 'zoom' ]
+    	controls: [ 'attribution', 'scale' ],
+		overlays: [ {
+	    	url: 'https://gbank.gsj.jp/seamless/tilemap/{type}/{layer}/{z}/{y}/{x}.png',
+    		title: 'シームレス地質図(詳細版)',
+	    	attribution: 'AIST GSJ',
+    		attribution_url: 'https://gbank.gsj.jp/seamless/',
+	    	minZoom: 5,
+	    	maxZoom: 13,
+    		opacity: 0.7,
+    		type: 'detailed',
+	    	layer: 'glfn',
+		} ],
+	} );
+
+	map.addOverlay( {
+	    url: 'https://gbank.gsj.jp/tilemap/gravdb/wmts/1.0.0/{type}/default/EPSG900913/{z}/{y}/{x}.png',
+	    title: '重力図（ブーゲー異常）（仮定密度2.00 g/cm3）',
+	    attribution: 'AIST GSJ',
+	    attribution_url: 'https://gbank.gsj.jp/',
+	    maxZoom: 18,
+	    minZoom: 0,
+	    opacity: 0.3,
+	    type: 'BouguerAnomaly200',
+	} ),
+
+	document.getElementById( 'scaleControl' ).addEventListener( 'click', function( event ) {
+		if ( this.checked ) {
+			map.addControl( 'scale' );
+		} else {
+			map.removeControl( 'scale' );
+		}
+	} );
+
+	document.getElementById( 'layerControl' ).addEventListener( 'click', function( event ) {
+		if ( this.checked ) {
+			//	引数はオブジェクトでも指定可能
+			map.addControl( { id: 'layer' } );
+		} else {
+			map.removeControl( 'layer' );
+		}
+	} );
+
+	document.getElementById( 'attributionControl' ).addEventListener( 'click', function( event ) {
+		if ( this.checked ) {
+			map.addControl( 'attribution', 'topright' );
+		} else {
+			map.removeControl( 'attribution' );
+		}
+	} );
+
+	document.getElementById( 'zoomControl' ).addEventListener( 'click', function( event ) {
+		if ( this.checked ) {
+			//	引数がオブジェクトの場合は，第2引数はpositionプロパティで与える
+			map.addControl( { id: 'zoom', position: 'topright' } );
+		} else {
+			map.removeControl( 'zoom' );
+		}
+	} );
+
+	var
+	    contents1 = document.createElement( 'div' ),
+		contents2 = document.getElementById( 'my-control2' );
+
+	contents1.className = 'my-control1';
+	contents1.innerHTML = '自作コントロール1';
+	contents1.addEventListener( 'click', function( evnet ) {
+		alert( '自作コントロールがクリックされました' );
+	} );
+	map.addControl( 'mycontrol1', 'topright', contents1 );
+	map.addControl( { id: 'mycontrol2', position: 'topright', contents: contents2 } );
+
+	document.getElementById( 'myControl1' ).addEventListener( 'click', function( event ) {
+		if ( this.checked ) {
+			map.addControl( { id: 'mycontrol1', position: 'topright', contents: contents1 } );
+		} else {
+			map.removeControl( 'mycontrol1' );
+		}
+	} );
+
+} )();
+
+	</script>
+</body>
+</html>
+
+

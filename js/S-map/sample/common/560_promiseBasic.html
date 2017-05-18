@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<!-- 560_promiseBasic.html, S-mapサンプル - プロミスの基本
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - プロミスの基本</title>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>S-mapサンプル - プロミスの基本</h1>
+	<h2>then( fn1, fn2 )構文</h2>
+	<h3>'../img/5440d.png'のロード(成功する例)</h3>
+	<div id="out1"></div>
+	<h3>'error'のロード(失敗する例)</h3>
+	<div id="out2"></div>
+
+	<h2>then( fn1 ).catch( fn2 )構文</h2>
+	<h3>'../img/5440d.png'のロード(成功する例)</h3>
+	<div id="out3"></div>
+	<h3>'error'のロード(失敗する例)</h3>
+	<div id="out4"></div>
+
+	<h2>Smap.resolve(), Smap.reject()のテスト</h2>
+	<h3>Smap.resolve( 'resolveテスト' )</h3>
+	<div id="out5"></div>
+	<h3>Smap.reject( 'rejectテスト' )</h3>
+	<div id="out6"></div>
+
+	<h2>メソッドチェーンのテスト</h2>
+	<h3>2番目のthen()で出力</h3>
+	<div id="out7"></div>
+	<h3>catch()で疑似エラーをハンドリング</h3>
+	<div id="out8"></div>
+	<h3>onFulfilledがプロミスを返す場合</h3>
+	<div id="out9"></div>
+
+	<script>
+
+'use strict';
+
+( function() {
+
+	var
+		imgsrc = '../img/5440d.png',
+		imgerr = 'error';
+		
+
+	function loadImage( src ) {
+		var
+			promise;
+
+		promise = Smap.promise( function( resolve, reject ) {
+			var
+				img = new Image();
+
+			img.onload = function() {
+				resolve( this );						// 成功時にはresolve()をコール
+			};
+			img.onerror = function( error ) {
+				reject( new Error( ' image error' ) );	// 失敗時にはreject()をコール
+			}
+			img.src = src;
+		} );
+		return promise;
+	}
+
+	function showTest( src, divId ) {
+		var
+			out = document.getElementById( divId );
+
+		loadImage( src ).then( function( img ) {
+			out.innerHTML = '成功: ' + img.src;
+		}, function( error ) {
+			out.innerHTML = '失敗: ' + error;
+		} );
+	}
+	
+	showTest( imgsrc, 'out1' );
+	showTest( imgerr, 'out2' );
+
+	function showTest2( src, divId ) {
+		var
+			out = document.getElementById( divId );
+
+		loadImage( src ).then( function( img ) {
+			out.innerHTML = '成功: ' + img.src;
+		} ).catch( function( error ) {
+			out.innerHTML = '失敗: ' + error;
+		} );
+	}
+	
+	showTest2( imgsrc, 'out3' );
+	showTest2( imgerr, 'out4' );
+
+	Smap.promise.resolve( 'resolveテスト' ).then( function( value ){	
+		document.getElementById( 'out5' ).innerHTML = value;
+	} );
+
+	Smap.promise.reject( 'rejectテスト' ).catch( function( value ){	
+		document.getElementById( 'out6' ).innerHTML = value;
+	} );
+	
+	// メソッドチェーンのテスト1
+	loadImage( imgsrc ).then( function( img ){
+		return img.src;
+	} ).then( function( value ) {
+		document.getElementById( 'out7' ).innerHTML = value;
+		return Promise.reject( '疑似エラー' );
+//		2015-03-17現在，以下のコードでは下位のcatch節に処理が受け継がれない
+//		return Smap.promise.reject( '疑似エラー' );
+	} ).catch( function( error ) {
+		document.getElementById( 'out8' ).innerHTML = error;
+	} );
+
+	// onFulfilledがプロミスを返す場合
+	loadImage( imgsrc ).then( function( img ){
+		return Smap.promise.resolve( img.src );
+	} ).then( function( value ) {
+		document.getElementById( 'out9' ).innerHTML = '成功: ' + value;
+	} );
+
+} )();
+
+	</script>
+</body>
+</html>

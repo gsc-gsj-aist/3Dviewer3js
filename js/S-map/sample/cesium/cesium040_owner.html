@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!-- cesium040_owner.html, S-mapサンプル - 描画先のdiv要素指定
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - 描画先のdiv要素指定</title>
+	<style>
+html, body { margin: 0px; width: 100%; height: 100% }
+#map1 { width:400px; height:300px }
+#map2 { width:400px; height:300px }
+	</style>
+	<link rel="stylesheet" href="http://cesiumjs.org/releases/1.24/Widgets/widgets.css"/>
+	<script src="http://cesiumjs.org/releases/1.24/Cesium.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<div id="map1"></div>
+	<div id="map2"></div>
+	<script>
+
+'use strict';
+
+( function() {
+
+	Smap.map( { engine: 'cesium', owner: 'map2' } );
+
+} )();
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,2874 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="GENERATOR" content="JustSystems Homepage Builder Version 20.0.3.0 for Windows">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link href="common.css" rel="stylesheet" type="text/css">
+<title>S-map － API</title>
+</head>
+<body>
+
+<div id="header">
+<table align="center">
+<tr>
+<td><a href="index.html">　Home　</a></td>
+<td><a href="quickstart.html">クイックスタート</a></td>
+<td class="select">　API　</td>
+<td><a href="explanation.html">　解説　</a></td>
+<td><a href="extension.html">拡張ガイド</a></td>
+<td><a href="update.html">更新履歴</a></td>
+<tr/>
+</table>
+</div>
+
+<h1>S-map - API</h1>
+<p align="center"><a href="#namespace">名前空間と定数</a> | <a href="#object">汎用オブジェクト</a> | <a href="#function">汎用関数</a><br>
+<a href="#map">Map</a> | <a href="#layer">Layer</a><br>
+<a href="#marker">Marker</a> | <a href="#icon">Icon</a> | <a href="#popup">Popup</a> | <a href="#polyline">Polyline</a> | <a href="#style">Style</a> | <a href="#geometrygroup">GeometryGroup</a><br>
+<a href="#control">Control</a> | <a href="#controller">Controller</a> | <a href="#elevationModel">ElevatoinModel</a> | <a href="#geocoder">Geocoder</a>| <a href="#promise">Promise</a></p>
+<p>　S-mapでは，いわゆるクラスを使用しません．必要なオブジェクトは全て関数の結果として得られます．このため，以下では例えば「Map」のように総称名として記述しますが，そのようなクラス名（やオブジェクト名）が実装されているわけではありません．<br>
+　特に，オブジェクト生成専用の関数をファクトリー関数と呼んでいます．ただし，通常Mapオブジェクト以外はファクトリー関数を使用する機会はほとんど無く，addMarker()等のメソッド利用時に自動的に生成されます．特に，LatLngオブジェクト等のファクトリ関数が用意されている汎用オブジェクトでは，引数にそれらが指定されている場合，S-map内部で自動的にファクトリー関数が呼ばれるので，さまざまが記述表現が可能です．</p>
+<blockquote><font color="#ff0000">※S-mapは現在開発中です．このページに記述されている機能のいくつかは実装されていません．特にCesiumエンジンはまだほとんどの機能が未実装です．</font></blockquote>
+<h4>・データ型の表現について</h4>
+<p>　このページでは，データ型を表すために，このページで記述されているデータ型と以下の表現を使用します．</p>
+<blockquote>Number, String, Boolean, Object, Function, DOMElement, DOMEvent, Eney(型を問わない）</blockquote>
+<p>　配列は[ ]で中に型名を入れて表現します．同じ型を列記でする場合は，「型名, ...」と表記します．複数の型を利用できる場合は | を挟んで列挙します．</p>
+<h2><a name="namespace" id="namespace">名前空間と定数</a></h2>
+<h3>Smap</h3>
+<p>　Smapは名前空間を定義するためのオブジェクトで，このライブラリで外部に直接提供される唯一のオブジェクトです．このライブラリのすべての定数，オブジェクト，関数は，このオブジェクトの直接ないし間接のプロパティとして定義されます．</p>
+<blockquote>※古いバージョンとの互換性のために，Smapの代わりにGSJをもちいることができます．ただし，この機能は将来的には廃止される予定です．</blockquote>
+<h3>定数</h3>
+<blockquote>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>定数</th>
+      <th>値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>Smap.DEFAULT_BASE</td>
+      <td>(地理院地図標準，<font color="#ff0000">https</font>)</td>
+      <td>デフォルトの背景地図&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Smap.BLANK_MAP</td>
+      <td>(無地の背景例イヤー)&nbsp;</td>
+      <td>無地の背景イヤーオブジェクト(このレイヤーはfillStyleで背景色を変更できます)</td>
+    </tr>
+    <tr>
+      <td>Smap.DEFAULT_ENGINE</td>
+      <td>'leaflet'</td>
+      <td>デフォルトのマップエンジン名</td>
+    </tr>
+    <tr>
+      <td>Smap.DEFAULT_GEOCODER</td>
+      <td>'csis'</td>
+      <td>デフォルトのジオコーダー&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Smap.EARTH_R&nbsp;</td>
+      <td>6378137</td>
+      <td>地球の長半径（WGS84, 単位ｍ）</td>
+    </tr>
+    <tr>
+      <td>Smap.ZOOM_LIMIT</td>
+      <td>24</td>
+      <td>このライブラリで利用できるズームレベルの限界値</td>
+    </tr>
+  </tbody>
+</table>
+</blockquote>
+<h2><a name="object" id="object">汎用オブジェクト</a></h2>
+<h3>Coord</h3>
+<p>　タイル座標（X, Y)及びズームレベルを表します．ズームレベルは省略されることがあります．</p>
+<blockquote>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>必須</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>x</td>
+      <td>Number</td>
+      <td align="center">○</td>
+      <td>X座標</td>
+    </tr>
+    <tr>
+      <td>y</td>
+      <td>Number</td>
+      <td align="center">○</td>
+      <td>Y座標</td>
+    </tr>
+    <tr>
+      <td>z</td>
+      <td>Numbet&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>ズームレベル&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+</blockquote>
+<h3>LatLng</h3>
+<p>　地理的な位置を表します．</p>
+<blockquote>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>必須</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>lat</td>
+      <td>Number</td>
+      <td align="center">○</td>
+      <td>緯度（360度法．北緯が正，南緯が負）</td>
+    </tr>
+    <tr>
+      <td>lng</td>
+      <td>Number</td>
+      <td align="center">○&nbsp;</td>
+      <td>経度（360度法．東経が正，西経が負）</td>
+    </tr>
+  </tbody>
+</table>
+</blockquote>
+<p>　このオブジェクトの生成用関数 Smap.latLng() が利用できます．</p>
+<h3>Point</h3>
+<p>　平面上のX, Y座標を表します．</p>
+<blockquote>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>必須</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>x</td>
+      <td>Number</td>
+      <td align="center">○</td>
+      <td>X座標</td>
+    </tr>
+    <tr>
+      <td>y</td>
+      <td>Number</td>
+      <td align="center">○</td>
+      <td>Y座標</td>
+    </tr>
+  </tbody>
+</table>
+</blockquote>
+<p>　このオブジェクトの生成用関数 Smap.Point() が利用できます．</p>
+<h3>Bounds</h3>
+<p>　地理的な矩形範囲を表します．</p>
+<blockquote>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>必須</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>sw</td>
+      <td>LatLng</td>
+      <td align="center">○</td>
+      <td>南西端の地理座標</td>
+    </tr>
+    <tr>
+      <td>ne</td>
+      <td>LatLng</td>
+      <td align="center">○</td>
+      <td>北東端の地理座標</td>
+    </tr>
+  </tbody>
+</table>
+</blockquote>
+<p>　通常は，sw.lat &lt; ne.latでなければなりません．また，sw.lng &gt; ne.lng の場合は子午線をはさんだ範囲となります．<br>
+　このオブジェクトの生成用関数 Smap.bounds() が利用できます．</p>
+<h3><font color="#000000">View</font></h3>
+<font color="#000000">
+</font>
+<p><font color="#000000">　地図の表示状態を表します．</font></p>
+<font color="#000000">
+</font>
+<blockquote>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th><font color="#000000">プロパティ</font></th>
+      <th><font color="#000000">型</font></th>
+      <th><font color="#000000">必須</font></th>
+      <th><font color="#000000">説明</font></th>
+    </tr>
+    <tr>
+      <td><font color="#000000">center</font></td>
+      <td><font color="#000000">LatLng</font></td>
+      <td align="center"></td>
+      <td><font color="#000000">中央の地理座標</font></td>
+    </tr>
+    <tr>
+      <td><font color="#000000">zoom</font></td>
+      <td><font color="#000000">Number</font></td>
+      <td align="center"></td>
+      <td><font color="#000000">ズームレベル</font></td>
+    </tr>
+    <tr>
+      <td><font color="#000000">azimuth</font></td>
+      <td><font color="#000000">Number</font></td>
+      <td align="center"><font color="#000000">&nbsp;</font></td>
+      <td><font color="#000000">地図の方位角(360度表記，0～360，北が0で時計回りに大きくります．</font></td>
+    </tr>
+    <tr>
+      <td><font color="#000000">dip</font></td>
+      <td><font color="#000000">Number</font></td>
+      <td align="center"></td>
+      <td><font color="#000000">地図の傾き&nbsp;(360度表記，-90～90）．0で水平．<br>
+      後方から見るように傾く場合は正前方から見るように傾く場合は負とします．</font></td>
+    </tr>
+  </tbody>
+</table>
+</blockquote>
+<h3><a name="event" id="event">Event</a></h3>
+<p>　イベントを表します．これらのすべの値が常に利用できるわけではありません．</p>
+<blockquote>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>domEvent</td>
+      <td>DOMEvent</td>
+      <td>オリジナルのDOMイベントオブジェクト．&nbsp;省略されることがあります．</td>
+    </tr>
+    <tr>
+      <td><font color="#000000">map</font></td>
+      <td><font color="#000000">Map</font></td>
+      <td><font color="#000000">Eventが発生したMapオブジェクト</font></td>
+    </tr>
+    <tr>
+      <td>original</td>
+      <td>Object</td>
+      <td>地図ライブラリ固有のイベントオブジェクト．省略されることがあります．</td>
+    </tr>
+    <tr>
+      <td>latLng</td>
+      <td>LatLng</td>
+      <td>イベントが発生した地理上の位置．省略されることがあります．</td>
+    </tr>
+    <tr>
+      <td>target</td>
+      <td>Object</td>
+      <td>イベントが発生したオブジェクト</td>
+    </tr>
+    <tr>
+      <td>type</td>
+      <td>String</td>
+      <td>イベントタイプ</td>
+    </tr>
+    <tr>
+      <td>altitude</td>
+      <td>Number</td>
+      <td>(locationfoundイベントのみで使用)<br>
+      WGS84楕円体を基準とする高度&nbsp;</td>
+    </tr>
+    <tr>
+      <td>accuracy</td>
+      <td>Number</td>
+      <td>(locationfoundイベントのみで使用)<br>
+      水平方向精度（m単位）</td>
+    </tr>
+    <tr>
+      <td>altitudeAccuracy</td>
+      <td>Number&nbsp;</td>
+      <td>(locationfoundイベントのみで使用)<br>
+      垂直方向精度（m単位）&nbsp;</td>
+    </tr>
+    <tr>
+      <td>headding</td>
+      <td>Number</td>
+      <td>(locationfoundイベントのみで使用)<br>
+      方位(北から時計回りの角度）</td>
+    </tr>
+    <tr>
+      <td>speed</td>
+      <td>Number</td>
+      <td>(locationfoundイベントのみで使用)<br>
+      速度（m/秒）</td>
+    </tr>
+    <tr>
+      <td>time</td>
+      <td>Date&nbsp;</td>
+      <td>取得時刻</td>
+    </tr>
+  </tbody>
+</table>
+</blockquote>
+<h2><a name="function" id="function">汎用関数</a></h2>
+<h3>汎用オブジェクトファクトリー関数</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>関数</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>Smap.latLng( latLng )</td>
+      <td>[ Number, Number ]<br>
+      | String<br>
+      | LatLng</td>
+      <td rowspan="2">LatLng<br>
+      &nbsp;| null</td>
+      <td rowspan="2">緯度経度を表すLatLngオブジェクトを生成します&nbsp;<br>
+      引数が文字列型の場合はカンマ区切りの文字列と解釈されます<br>
+      生成に失敗するとnullを返します</td>
+    </tr>
+    <tr>
+      <td>Smap.latLng( lat,<br>
+      　lng )</td>
+      <td>Number,<br>
+      Number</td>
+    </tr>
+    <tr>
+      <td>Smap.point( point )&nbsp;</td>
+      <td>[ Number, Number ]<br>
+      | String<br>
+      | Point</td>
+      <td rowspan="2">Point <br>
+      | null&nbsp;</td>
+      <td rowspan="2">平面上の座標を表すPointオブジェクトを生成します&nbsp;<br>
+      引数が文字列型の場合はカンマ区切りの文字列と解釈されます<br>
+      生成に失敗するとnullを返します</td>
+    </tr>
+    <tr>
+      <td>Smap.point( x,<br>
+      　y )</td>
+      <td>Number,<br>
+      Number</td>
+    </tr>
+    <tr>
+      <td>Smap.bounds( bounds )</td>
+      <td>[ LatLng, LatLng ]<br>
+      | [ [ Number, Number ], [ Number, Number ] ]<br>
+      | Bounds</td>
+      <td rowspan="3">Bounds<br>
+      |&nbsp;null&nbsp;</td>
+      <td rowspan="3">経緯度で指定された矩形領域をあらわすBoundsオブジェクトを生成します<br>
+      生成に失敗するとnullを返します&nbsp;&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Smap.bounds( sw,<br>
+      　ne )</td>
+      <td>LatLng | [ Number, Number ],<br>
+      LatLng | [ Number, Number ]</td>
+    </tr>
+    <tr>
+      <td>Smap.bounds( s,<br>
+      　w,<br>
+      　n,<br>
+      　e )</td>
+      <td>Number,<br>
+      Number,<br>
+      Number,<br>
+      Number&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+<h3>地理座標変換</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>関数</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>Smap.latLngToPoint( latLng,<br>
+      　zoom )</td>
+      <td>LatLng,<br>
+      Number</td>
+      <td>Point</td>
+      <td>緯度経度とズームレベルを指定して，ピクセル座標を取得します．<br>
+      ここでのピクセル座標とは，そのズームレベルにおいて256ピクセルのタイルを使用した場合の座標で，左上を原点，右及び下をX, Y座標の正としたものです．</td>
+    </tr>
+    <tr>
+      <td>Smap.pointToLatLng( point,<br>
+      zoom )</td>
+      <td>Point,<br>
+      Number</td>
+      <td>LatLng</td>
+      <td>ピクセル座標とズームレベルを指定して緯度経度に変換します．<br>
+      ピクセル座標の定義はlatLngToPoint()関数と同じです．</td>
+    </tr>
+  </tbody>
+</table>
+<h3><a name="zoomscale" id="zoomscale">ズームレベルとスケールの変換</a></h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>関数</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>Smap.zoomToScale( zoom,<br>
+      　lat )</td>
+      <td>Number,<br>
+      Number</td>
+      <td>Number</td>
+      <td>ズームレベルをスケール(m/ピクセル)に変換します．<br>
+      変換には緯度(360度法)も必要です</td>
+    </tr>
+    <tr>
+      <td>Smap.scaleToZoom( scale,<br>
+      　lat )</td>
+      <td>Number,<br>
+      Number</td>
+      <td>Number</td>
+      <td>スケール(m/ピクセル)をズームレベルに変換します．<br>変換には緯度(360度法)も必要です</td>
+    </tr>
+    <tr>
+      <td>Smap.zoomYToScale( zoom,<br>
+      　y )&nbsp;</td>
+      <td>Number,<br>
+      Number</td>
+      <td>Number&nbsp;</td>
+      <td>ズームレベルとポイントY座標に対応するスケール(m/ピクセル)を返します．</td>
+    </tr>
+  </tbody>
+</table>
+<h3>標高</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>関数</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>Smap.getElevation( latLng,<br>
+      　z,<br>
+      　<font color="#000000">params</font>)</td>
+      <td>LatLng,<br>
+      Number,<br>
+      <font color="#000000">Object,</font></td>
+      <td>Promise</td>
+      <td>指定した位置(latLng)とズームレベル(z)の標高を取得するプロミスを発行します．<br>
+      プロミス成功時の引数には標高値(m)が渡されます．<br>
+      paramsでは取得方法をパラメータオブジェクトで指定します．このオブジェクトのtypeプロパティに'm'を指定すると1m精度，'cm'を指定するとcm精度となります．<br>
+      paramsオブジェクトのpngzipプロパティにtrueを設定すると，zip圧縮された標高タイル（拡張子はzipに変更されます）を利用するようになります．</td>
+    </tr>
+  </tbody>
+</table>
+<h3>マップエンジン</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>関数</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>Smap.getEnginNames()</td>
+      <td>なし</td>
+      <td>[ String, ... ]&nbsp;</td>
+      <td>使用できるマップエンジン名のリストを取得します</td>
+    </tr>
+  </tbody>
+</table>
+<h3>ファイルのロード</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>関数</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>Smap.loadArrayBuffer( url,<br>
+      　headers )</td>
+      <td>String,<br>
+      Object</td>
+      <td>Promise</td>
+      <td>urlで指定したファイルをArrayBufferとしてロードするプロミスを生成します．<br>
+      headersは省略化で，リクエスト追加するヘッダを連想配列で指定します．<br>
+      プロミス成功時の引数にはArrayBufferオブジェクトが渡されます．<br>
+      プロミス失敗時の引数にはエラーレスポンスオブジェクト(msgとstatuscodeプロパティを持つ)が渡されます．<br>
+      urlは同一生成元か，CORS設定がされている必要があります</td>
+    </tr>
+    <tr>
+      <td>Smap.loadBLOB( url,<br>
+      　headers )<br>
+      <font color="#ff0000">Smap.loadBlob( url,<br>
+      　headers )　廃止予定</font></td>
+      <td>String,<br>
+      Object</td>
+      <td>Promise</td>
+      <td>urlで指定したファイルをBlobとしてロードするプロミスを生成します．<br>
+      headersは省略化で，リクエスト追加するヘッダを連想配列で指定します．<br>
+      プロミス成功時の引数にはBlobオブジェクトが渡されます．<br>
+      プロミス失敗時の引数にはエラーレスポンスオブジェクト(msgとstatuscodeプロパティを持つ)が渡されます．<br>
+      urlは同一生成元か，CORS設定がされている必要があります&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Smap.loadCSV( url,<br>
+      　sep, headers )&nbsp;</td>
+      <td>String,<br>
+      String,<br>
+      Object</td>
+      <td>Promise</td>
+      <td>CSVファイルをロードするプロミスを生成します．<br>
+      headersは省略化で，リクエスト追加するヘッダを連想配列で指定します．<br>
+      プロミス成功時の引数には2重配列としてデータが渡されます．<br>
+      プロミス失敗時の引数にはエラーレスポンスオブジェクト(msgとstatuscodeプロパティを持つ)が渡されます．<br>
+      sepは項目の区切り文字を指定します．省略すると','となります．</td>
+    </tr>
+    <tr>
+      <td>Smap.loadImage( url,<br>
+      　params )</td>
+      <td>String,<br>
+      Object</td>
+      <td>Promise&nbsp;</td>
+      <td>画像ファイルをロードするプロミスを生成します．paramsを設定すると，内部生成するImageオブジェクトに設定されます．プロミス成功時の引数にはImageオブジェクトが渡されます．<br>
+      プロミス失敗時の引数にはエラーレスポンスオブジェクト(msgとstatuscodeプロパティを持つ)が渡されます．</td>
+    </tr>
+    <tr>
+      <td>Smap.loadImagePixel( url,<br>
+      　i,<br>
+      　j )&nbsp;</td>
+      <td>String,<br>
+      Number,<br>
+      Number</td>
+      <td>Promise&nbsp;</td>
+      <td>画像ファイルの位置(i,j)のデータロードするプロミスを生成します．<br>
+      プロミス成功時の引数にはピクセルデータ(R,G,B,Aの4成分の配列データ)，または<font color="#000000">i,j画像範囲外の場合はnullが渡されます(仕様変更　2014-10-29)</font><br>プロミス失敗時の引数にはエラーレスポンスオブジェクト(msgとstatuscodeプロパティを持つ)が渡されます．</td>
+    </tr>
+    <tr>
+      <td>Smap.loadPNGZip( url,<br>
+      　headers )<br>
+      <font color="#ff0000">Smap.loadPngZip( url,<br>
+      　headers )　廃止予定</font></td>
+      <td>String,<br>
+      Object</td>
+      <td>Promise</td>
+      <td>単体のpngファイルをzip圧縮したものをロードするプロミスを生成します．<br>
+      headersは省略化で，リクエスト追加するヘッダを連想配列で指定します．<br>
+      プロミス成功時の引数にはimgオブジェクトが渡されます．<br>
+      プロミス失敗時の引数にはエラーレスポンスオブジェクト(msgとstatuscodeプロパティを持つ)が渡されます．<br>
+      urlは同一生成元か，CORS設定がされている必要があります<br>
+      この関数は，pngファイルが圧縮されて受信されてしまうような環境においてそれを回避するために使用します．</td>
+    </tr>
+    <tr>
+      <td>Smap.loadJSON( url.<br>
+      　headers  )&nbsp;</td>
+      <td>String,<br>
+      Object&nbsp;</td>
+      <td>Promise</td>
+      <td>JSONファイルをロードするプロミスを生成します．<br>
+      headersは省略化で，リクエスト追加するヘッダを連想配列で指定します．<br>
+      プロミス成功時の引数にはJSONオブジェクトが渡されます．<br>
+      プロミス失敗時の引数にはエラーレスポンスオブジェクト(msgとstatuscodeプロパティを持つ)が渡されます．<br>
+      urlは同一生成元か，CORS設定がされている必要があります</td>
+    </tr>
+    <tr>
+      <td>Smap.loadText( url,<br>
+      　headers )&nbsp;</td>
+      <td>String,<br>
+      Object</td>
+      <td>Promise</td>
+      <td>テキストファイルをロードするプロミスを生成します．<br>      headersは省略化で，リクエスト追加するヘッダを連想配列で指定します．<br>
+      プロミス成功時の引数にはテキストが渡されます．<br>
+      プロミス失敗時の引数にはエラーレスポンスオブジェクト(msgとstatuscodeプロパティを持つ)が渡されます．<br>
+      urlは同一生成元か，CORS設定がされている必要があります</td>
+    </tr>
+    <tr>
+      <td>Smap.loadXML( url,<br>
+      　headers )</td>
+      <td>String,<br>
+      Object</td>
+      <td>Promise</td>
+      <td>urlで指定したXMLファイルをロードするプロミスを生成します．<br>
+      headersは省略化で，リクエスト追加するヘッダを連想配列で指定します．<br>
+      プロミス成功時の引数にはxmlオブジェクトが渡されます．<br>
+      プロミス失敗時の引数にはエラーレスポンスオブジェクト(msgとstatuscodeプロパティを持つ)が渡されます．<br>
+      urlは同一生成元か，CORS設定がされている必要があります</td>
+    </tr>
+    <tr>
+      <td>Smap.loadXML( url,<br>
+      　type,<br>
+      　headers )&nbsp;</td>
+      <td>String,<br>
+      String<br>
+      Object</td>
+      <td>Promise</td>
+      <td>urlで指定したファイルをXMLHttpRequestを使ってロードするプロミスを生成します．<br>
+      typeには，'arraybuffer', 'blob', 'document', 'text'(デフォルト), 'json'が指定可能です．<br>
+      headersは省略化で，リクエスト追加するヘッダを連想配列で指定します．<br>
+      プロミス成功時の引数にはtypeに従ったオブジェクトが渡されます．<br>
+      プロミス失敗時の引数にはエラーレスポンスオブジェクト(msgとstatuscodeプロパティを持つ)が渡されます．<br>
+      urlは同一生成元か，CORS設定がされている必要があります</td>
+    </tr>
+  </tbody>
+</table>
+<blockquote><font color="#ff0000">※iOS(Safari, Chorme)では，CORS設定がされていてもloadJSON, loadText, loadXMLで読み込むことができないようです．</font></blockquote>
+<h3>URLの保存</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>関数</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>Smap.mapToKMZ( canvas,<br>
+      　bounds,<br>
+      　filename,<br>
+      　params )</td>
+      <td>Canvas,<br>
+      Bounds,<br>
+      String,<br>
+      Object</td>
+      <td>なし&nbsp;</td>
+      <td>Canvasに描かれた地図画像をKMZとして保存します．<br>
+      paramsではname, descriptionを指定でき，KMZ内のGroundOverlayの&lt;name&gt;要素や&lt;description&gt;要素として書き込まれます．</td>
+    </tr>
+    <tr>
+      <td>Smap.saveURL( url,<br>
+      　failename )</td>
+      <td>String,<br>
+      String</td>
+      <td>なし</td>
+      <td>urlで指定した内容をクライアント環境に保存します．</td>
+    </tr>
+  </tbody>
+</table>
+<h3>base64url</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>関数</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>Smap.base64url.encode( array )</td>
+      <td>[ Boolean, ... ]</td>
+      <td>String</td>
+      <td>論理型の配列をbase64urlでエンコードします．<br>
+      論理型の代わりに 0 (偽 )，1 ( 真 ) を指定することも可能です．</td>
+    </tr>
+    <tr>
+      <td>Smap.base64url.decode( str )</td>
+      <td>String</td>
+      <td>[ Boolean, ... ]</td>
+      <td>base64urlでエンコードされた文字列をデコードします．</td>
+    </tr>
+  </tbody>
+</table>
+<h2><a name="map" id="map">Map</a></h2>
+<p>　Mapオブジェクトは地図全体を示すオブジェクトで，S-mapの最も基本となるオブジェクトです，</p>
+<h3>・生成関数</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>関数</th>
+      <th>引数の型</th>
+      <th>戻り値&nbsp;</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>Smap.map( params )</td>
+      <td>String | Object</td>
+      <td>Map</td>
+      <td>Mapオブジェクトを作成します．<br>
+      引数には地図を描画するDOMを指定するid属性値またはパラメータオブジェクトを指定します．<br>
+      省略すると&lt;body&gt;要素が描画要素となります．</td>
+    </tr>
+    <tr>
+      <td>Smap.createMap( params )</td>
+      <td>String | Object</td>
+      <td>Promise</td>
+      <td>Mapオブジェクトを作成するプロミスを生成します．<br>
+      引数はGSJ.map()とまったく同様です．<br>
+      成功すると引数にMapオブジェクトが渡されます．<br>
+      ※非同期でMapオブジェクトを生成するエンジンの場合に使用するもので，Leaflet.jsやCesiumでは不要です．</td>
+    </tr>
+  </tbody>
+</table>
+<p>　パラメータオブジェクトは以下のプロパティを持つことができます．</p>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>bases</td>
+      <td>[ Layer | String, .. .]</td>
+      <td>[ (地理院地図標準） ]</td>
+      <td>背景レイヤー（またはそれを識別するレイヤーid<sup>*</sup>）のリスト．<br>
+      デフォルト地図（地理院地図標準, id='CHIRIIN_STD'）と無地背景を指定するためのレイヤーオブジェクトはそれぞれSmap.DEFAULT_BASE，Smap.BLANK_MAP(id='BLANK_MAP')として定義されていますのでそれを使用することもできます．</td>
+    </tr>
+    <tr>
+      <td>center</td>
+      <td>LatLng</td>
+      <td>{ lat: 0, lng: 0 }</td>
+      <td>地図の中央の地理的な位置</td>
+    </tr>
+    <tr>
+      <td>controls</td>
+      <td>[ String, ... ]</td>
+      <td>[ 'attribution', 'scale', 'zoom' ]</td>
+      <td>表示するコントロール名を配列で指定．&nbsp;<br>
+      コントロール名は'attribution', 'scale', 'zoom', 'layer'が指定できる</td>
+    </tr>
+    <tr>
+      <td><font color="#ff0000">elevationModel</font></td>
+      <td><font color="#ff0000">String |<br>
+      ElevationModel</font></td>
+      <td><font color="#ff0000">(シームレス標高サービス仮称)&nbsp;</font></td>
+      <td><font color="#ff0000">地形描画に利用する標高モデル．<br>
+      文字列の場合は標高タイルのURLテンプレートと解釈します．&nbsp;</font></td>
+    </tr>
+    <tr>
+      <td>engine</td>
+      <td>String&nbsp;</td>
+      <td>'leaflet'&nbsp;</td>
+      <td>マップエンジンを指定<br>
+      'leaflet'(Leaflet.js），Cesium(Cesium)が指定できます．</td>
+    </tr>
+    <tr>
+      <td>hf</td>
+      <td>Number</td>
+      <td>1</td>
+      <td>地形の強調度（1で強調無し）</td>
+    </tr>
+    <tr>
+      <td>home</td>
+      <td>Object</td>
+      <td>(center,zoomの指定による)</td>
+      <td>reset()メソッド実行時に移動する中心とズームレベル&nbsp;<br>
+      centar(LatLng型)とzoom(Number)型からなるオブジェクト<br>
+      指定がなれば，パラメータオブジェクトのcenterとzoomの値となります．</td>
+    </tr>
+    <tr>
+      <td>maxZoom</td>
+      <td>Number&nbsp;</td>
+      <td>Smap.ZOOM_LIMIT</td>
+      <td>ズームレベルの最大値&nbsp;</td>
+    </tr>
+    <tr>
+      <td>minZoom</td>
+      <td>Number</td>
+      <td>0&nbsp;</td>
+      <td>ズームレベルの最小値</td>
+    </tr>
+    <tr>
+      <td>overlays</td>
+      <td>[ Layer, ... ]</td>
+      <td>[ ]</td>
+      <td>オーバーレイレイヤーのリスト</td>
+    </tr>
+    <tr>
+      <td>owner</td>
+      <td>String | DOMElement</td>
+      <td>body要素</td>
+      <td>地図を描画するDOMElement<br>
+      文字列の場合はid属性と解釈して要素を探します</td>
+    </tr>
+    <tr>
+      <td>zoom</td>
+      <td>Number</td>
+      <td>0</td>
+      <td>ズームレベル</td>
+    </tr>
+  </tbody>
+</table>
+<blockquote><sup>*</sup>レイヤーidは，レイヤーを指定するための文字列です．デフォルトで以下のレイヤー情報とレイヤーidが予約されており，レイヤーオブジェクトを直接指定する代わりに利用できます．<br>
+'CHIRIIN_STD' ... 地理院地図(標準）<br>
+'BLANK_MAP'　... 無地背景<br>
+'OPEN_STREET_MAP' ... Open Street Map<font color="#ff0000">　（未実装）</font><br>
+'GOOGLEMAPS_LOAD' ... Googleマップ(道路）<font color="#ff0000">　（未実装）</font></blockquote>
+<h3>・プロパティ</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト</th>
+      <th>生成後</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td><font color="#ff0000">fps</font></td>
+      <td><font color="#ff0000">Number</font></td>
+      <td><font color="#ff0000">なし</font></td>
+      <td><font color="#ff0000">参照のみ</font></td>
+      <td><font color="#ff0000">1秒当たりの描画フレーム数</font></td>
+    </tr>
+    <tr>
+      <td>maxZoom</td>
+      <td>Number&nbsp;</td>
+      <td>Smap.ZOOM_LIMIT</td>
+      <td>参照のみ</td>
+      <td>ズームレベルの最大値&nbsp;</td>
+    </tr>
+    <tr>
+      <td>minZoom</td>
+      <td>Number</td>
+      <td>0&nbsp;</td>
+      <td>参照のみ</td>
+      <td>ズームレベルの最小値</td>
+    </tr>
+    <tr>
+      <td>promise</td>
+      <td>Promise</td>
+      <td>なし&nbsp;</td>
+      <td>参照のみ&nbsp;</td>
+      <td>非同期でMapオブジェクトが生成される場合に，S-mapによりセットされます&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+<h3>・メソッド ( レイヤー操作 )</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>addBase( layer )</td>
+      <td>Layer&nbsp;</td>
+      <td>Layer&nbsp;</td>
+      <td>背景レイヤーを追加<br>
+      layerにはLayerオブジェクトを生成するためのオブジェクトリテラルを渡します．</td>
+    </tr>
+    <tr>
+      <td>addOverlay( layer )</td>
+      <td>Layer</td>
+      <td>Layer</td>
+      <td>オバーレイレイヤを追加<br>layerにはLayerオブジェクトを生成するためのオブジェクトリテラルを渡します．</td>
+    </tr>
+    <tr>
+      <td>findBase( layer )</td>
+      <td>String | Layer</td>
+      <td>Layer | [ Layer ]&nbsp;<br>
+      | null</td>
+      <td>背景レイヤーの検索<br>
+      引数に文字列を指定した場合，idまたはtitleが一致する背景レイヤーを検索し，最初に見つかったものを返します．見つからなければnullを返します<br>
+      引数にLayerオブジェクトを指定した場合，レイヤが含まれればそのレイヤー自身を返します．<br>
+      引数を省略すると全ての背景レイヤーのリストを返します．</td>
+    </tr>
+    <tr>
+      <td>findOverlay( layer )</td>
+      <td>String | Layer</td>
+      <td>Layer | [ Layer ] | null</td>
+      <td>オーバーレイレイヤーの検索<br>
+      引数に文字列を指定した場合，idまたはtitleが一致するオーバーレイレイヤーを検索し，最初に見つかったものを返します．見つからなければnullを返します．<br>
+      引数にLayerオブジェクトを指定した場合，レイヤが含まれればそのレイヤー自信を返します．<br>
+      引数を省略すると全てのオーバーレイレイヤーのリストを返します．</td>
+    </tr>
+    <tr>
+      <td>getBase()</td>
+      <td>なし</td>
+      <td>Layer</td>
+      <td>現在表示されている背景レイヤーを返します．</td>
+    </tr>
+    <tr>
+      <td>removeBase( layer )</td>
+      <td>Layer | String</td>
+      <td>なし</td>
+      <td>背景レイヤーを削除&nbsp;<br>
+      layerがStringの場合は，idプロパティまたはtitleプロパティの値として検索し，削除します．<br>
+      現在表示されている背景を削除すると，最後に追加した背景レイヤが表示されます．</td>
+    </tr>
+    <tr>
+      <td>removeOverlay( layer )</td>
+      <td>Layer | String</td>
+      <td>なし</td>
+      <td>指定したオーバーレイレイヤーを削除します．<br>
+      引数に文字列を指定すると，idまたはtitle属性として検索します．<br>
+      引数を省略すると全てのオーバーレイレイヤを削除します．&nbsp;</td>
+    </tr>
+    <tr>
+      <td>setBase( layer )</td>
+      <td>Layer |String | Nmber</td>
+      <td>Layer&nbsp;</td>
+      <td>背景レイヤーをlayerに変更<br>
+      すでに背景として登録されているもののみが指定できます．<br>
+      layerがStringの場合は，idプロパティまたはtitleプロパティの値として検索し，変更します．<br>
+      layerがNumberの場合は，登録されている背景レイヤーの通し番号として解釈して背景レイヤーを指定します．<br>
+      layerを省略すると，現在表示されている背景レイヤーを返します</td>
+    </tr>
+  </tbody>
+</table>
+<h3>・メソッド ( 状態の取得と変更 )</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>get( key )</td>
+      <td>String</td>
+      <td>Layer | Eney</td>
+      <td>keyをプロパティ名とするプロパティ値を返します．<br>
+      プロパティ名には，'bounds', 'center', 'draggable'及び'zoom'が指定できます．</td>
+    </tr>
+    <tr>
+      <td>getBounds()</td>
+      <td>なし</td>
+      <td><font color="#000000">Bounds | null</font></td>
+      <td>地図が表示している範囲を返します．<br>
+      <font color="#ff0000">※Cesiumeエンジンではサポートされません</font></td>
+    </tr>
+    <tr>
+      <td>getCenter()&nbsp;</td>
+      <td>なし</td>
+      <td>LatLng</td>
+      <td>地図の中心を返します</td>
+    </tr>
+    <tr>
+      <td>getDraggable()</td>
+      <td>なし</td>
+      <td>Boolean</td>
+      <td>マウスで地図をドラッグ可能な場合はTrueを返します．</td>
+    </tr>
+    <tr>
+      <td>getHf()</td>
+      <td>なし</td>
+      <td>Number</td>
+      <td>高さ誇張係数を返します(2Dでは使用できません）&nbsp;</td>
+    </tr>
+    <tr>
+      <td>getHome()</td>
+      <td>なし</td>
+      <td>View</td>
+      <td>ホーム(reset()メソッド実行時の地図の表示状態)を返します．</td>
+    </tr>
+    <tr>
+      <td>getScale()</td>
+      <td>なし</td>
+      <td>Number</td>
+      <td>スケール (1ピクセルあたりの長さm ) を返します．</td>
+    </tr>
+    <tr>
+      <td>getView()</td>
+      <td>なし</td>
+      <td>View</td>
+      <td>地図の表示状態を返します．</td>
+    </tr>
+    <tr>
+      <td>getVisibility()&nbsp;</td>
+      <td>なし</td>
+      <td>Boolean</td>
+      <td>マップが表示状態ならばTrueを返します．</td>
+    </tr>
+    <tr>
+      <td>getZoom()</td>
+      <td>なし</td>
+      <td>Number</td>
+      <td>ズームレベルを返します．</td>
+    </tr>
+    <tr>
+      <td>redraw()</td>
+      <td>なし</td>
+      <td>this</td>
+      <td>全てのレイヤーを再描画します<br>
+      <font color="#ff0000">※現在の実装（ver. 0.1.1）では，タイルレイヤーのみを再描画します</font></td>
+    </tr>
+    <tr>
+      <td>reset()</td>
+      <td>なし</td>
+      <td>this</td>
+      <td>地図の表示状態を「ホーム」に変更します．&nbsp;</td>
+    </tr>
+    <tr>
+      <td>scaleControl( show )<br>
+      <font color="#ff0000">廃止予定</font></td>
+      <td>Boolean</td>
+      <td>なし</td>
+      <td>スケールコントロールを表示（ showがtrueのとき）または非表示( showがfalseのとき）<br>
+      <font color="#ff0000">代わりにaddControl, removeControlを使用してください</font></td>
+    </tr>
+    <tr>
+      <td>set( params,<br>
+      　value )</td>
+      <td>Object | String,<br>
+      Eney</td>
+      <td>Layer | Eney</td>
+      <td>このオブジェクトのプロパティ値をセット<br>
+      paramsがオブジェクトの場合，連想配列と解釈して各プロパティとその値を設定し，自分自身を返します．<br>
+      paramsが文字列の場合，paramsをプロパティ名として，(指定されていれば)valueを設定し，最終的なプロパティ値を返します．<br>
+      プロパティ名には，'bounds', 'center', 'draggable'及び'zoom'が指定できます．<br>
+      <font color="#ff0000">paramsへのオブジェクト指定は未実装</font></td>
+    </tr>
+    <tr>
+      <td>setBounds( bounds )&nbsp;</td>
+      <td>Bounds</td>
+      <td><font color="#000000">Bounds | null</font></td>
+      <td>南西および北東の緯度経度を指定して，その範囲が収まりかつ最大になるように描画位置と範囲を変更<br>
+      最終的な範囲を返します．<br>
+      マップエンジンの状態等により情報取得に失敗することがあり，その場合はnullを返します．</td>
+    </tr>
+    <tr>
+      <td>setCenter( latLng,<br>
+      　options )</td>
+      <td>LatLng,<br>
+      Object</td>
+      <td>LatLng</td>
+      <td>地図の中心を指定<br>
+      引数を省略すると現在の中心が返されます．<br>
+      optionsに{ animate: false }を指定するとアニメーションを抑止します．</td>
+    </tr>
+    <tr>
+      <td>setDraggable( draggable )</td>
+      <td>Boolean</td>
+      <td>Boolean&nbsp;</td>
+      <td>マウスで地図をドラッグ可能にするかを指定します．<br>
+      返り値には現在の状態を返します．</td>
+    </tr>
+    <tr>
+      <td>setHf( f )</td>
+      <td>Number</td>
+      <td>Number</td>
+      <td>高さ誇張係数を指定<br>
+      引数を省略すると現在の誇張係数を返します．<br>
+      2Dマップ（leaflet.js)では使用できません</td>
+    </tr>
+    <tr>
+      <td>setHome( home )</td>
+      <td>View</td>
+      <td>View</td>
+      <td>ホーム(reset()メソッド実行時の表示状態)を設定します．<br>
+      homeを省略すると，現在のホームを返します．</td>
+    </tr>
+    <tr>
+      <td>setScale( scale,<br>
+      　options )</td>
+      <td>Number<br>
+      Object</td>
+      <td>Number</td>
+      <td>スケール (1ピクセルあたりの長さm ) を指定<br>
+      引数を省略すると現在のスケールを返します．<br>optionsに{ animate: false }を指定するとアニメーションを抑止します</td>
+    </tr>
+    <tr>
+      <td>setView( view,<br>
+      　options)</td>
+      <td>View,<br>
+      Object</td>
+      <td></td>
+      <td>地図の表示設定を指定します．<br>
+      viewでは，値が省略された場合は現在の値となります．<br>
+      optionsで指定するオブジェクトで，animateプロパティに false を指定するとアニメーションを抑止します．全ての引数を省略すると現在の表示設定を返します．<br>
+      <font color="#ff0000">※optionsのpitchプロパティにはカメラのピッチ角(360度法)を指定できます（デフォルトは-90）は，廃止予定</font><br>
+      </td>
+    </tr>
+    <tr>
+      <td>setVisibility( visibility )&nbsp;</td>
+      <td>Boolean</td>
+      <td>Boolean</td>
+      <td>マップの表示・非表示をセット<br>
+      引数を省略すると現在の表示状態を返します．</td>
+    </tr>
+    <tr>
+      <td>setZoom( zoom,<br>
+      　options)</td>
+      <td>Number,<br>
+      Object</td>
+      <td>Number</td>
+      <td>ズームレベルをzoomに変更<br>
+      変更されたズームレベルを返します．&nbsp;引数を省略すると現在のズームレベルを返します．<br>
+      zoomには実数値を指定できますが，Leaflet.jsなどのように整数値のズームレベルしか扱えない場合は四捨五入されます．<br>optionsに{ animate: false }を指定するとアニメーションを抑止します</td>
+    </tr>
+  </tbody>
+</table>
+<h3>・メソッド ( 描画オブジェクトの追加と削除)</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>add( object )</td>
+      <td>Object&nbsp;</td>
+      <td>Object</td>
+      <td>ポリライン，マーカー，ポップアップ，ジオメトリーグループ，背景レイヤー，オーバーレイレイヤー，コントローラーを追加します．<br>
+      このメソッドは，引数の型に応じて対応する追加メソッド（addPolylineなど）を呼び出します．引数には，各メソッドに渡される引数をフィールドに持つオブジェクトを指定します．</td>
+    </tr>
+    <tr>
+      <td>addControl( control )</td>
+      <td>Control</td>
+      <td>Control</td>
+      <td rowspan="2">controlで指定したコントロールを追加し，追加したオブジェクトを返します．<br>
+      引数にはControlオブジェクトのリテラル表現，またはそれらのプロパティを直接指定します．<br>
+      idは必須で，'attribution', 'layer', 'scale', 'zoom'を指定した場合はそれぞれ既定のアトリビューション，レイヤー，スケール，ズームコントロールが表示されます．それ以外を指定した場合は自作コントロールとなり，contenstで指定した内容が表示されます．contentsではHTMLElementまたはid属性値を指定できます．<br>
+      positionは表示位置を'topleft', 'topright', 'bottomleft', 'bottomright'から指定します．省略可能で省略した場合はデフォルトの位置に配置されます（基底のコントロールはそれぞれデフォルト位置が異なります．自作のコントロールの場合は'bottomright'です）&nbsp;</td>
+    </tr>
+    <tr>
+      <td>addControl( id,<br>
+      　position,<br>
+      　contents )</td>
+      <td>String<br>
+      String,<br>
+      HTMLElement | String&nbsp;</td>
+      <td>Control</td>
+    </tr>
+    <tr>
+      <td>addGeometryGroup( geometries )</td>
+      <td>[ Object, ... ]&nbsp;</td>
+      <td rowspan="2">GeometryGroup&nbsp;</td>
+      <td rowspan="2">ジオメトリーグループを追加します．<br>
+      引数には&nbsp;Geometryオブジェクト（マーカー，ポップアップ，ポリライン，イメージ）の配列，またはGeometryGroupオブジェクトのリテラルを指定します．引数を省略すると要素を持たないGeometryGroupオブジェクトが生成されます．<br>
+      戻り値には追加されたGeometryGroupオブジェクトが返されます．</td>
+    </tr>
+    <tr>
+      <td>addGeometryGroup( geometryGrouop )&nbsp;</td>
+      <td>GeometryGroup</td>
+    </tr>
+    <tr>
+      <td>addMarker( latLng,<br>
+      　options )</td>
+      <td>LatLng,<br>
+      Object</td>
+      <td>Marker</td>
+      <td><font color="#ff0000">指定した位置にマーカを追加<br>
+      optionsの機能は以下の通り地図描画エンジンに依存します．<br>
+      (Leafletエンジン)<br>
+      titleプロパティにテキストを設定すると，ツールチップとして表示されます．<br>
+      popupプロパティにテキストまたはPopupオブジェクトを設定すると，ポップアップウィンドが表示されます．html要素が使用できます．<br>
+      iconプロパティでIconオブジェクト指定することによりアイコンを変更することができます．<br>
+      draggableプロパティにtrueを指定するとMarkerがドラッグできるようになります．<br>
+      のzIndexOffsetプロパティにおおきめの正の整数（たとえば1000)を設定すると，他の要素よりも前面に描画させることができます．負の大きい整数の場合は背面に描画させます．<br>
+      (Cesiumエンジン)<br>
+      titleプロパティにテキストを設定すると，クリックしたときに表示されるウィンドウにタイトルとして表示されます．<br>
+      popupプロパティにテキストまたはPopupオブジェクトを設定すると，クリックしたときに表示されるウィンドウのコンテンツとして表示されます．html要素が使用できます．</font></td>
+    </tr>
+    <tr>
+      <td>addPolyline( latLngs,<br>
+      　close,<br>
+      　style )</td>
+      <td>[ LatLng, ... ],<br>
+      Boolean,<br>
+      Style</td>
+      <td rowspan="2">Polyline&nbsp;&nbsp;</td>
+      <td rowspan="2">ポリライン（ポリゴンを含む）を追加します<br>
+      latLngsに位置の配列を指定します．<br>
+      closeにfalseを指定するか省略するとポリラインを描き，trueを指定すると閉じてポリゴンを描きます）．<br>
+      styleにはStyleオブジェクトを指定し，color（ストロークカラー）, opacityをなどが設定できます．<br>
+      引数に，latLngs, close, styleフィールドを持つオブジェクトを与えることもできます．<br>
+      戻り値には追加されたポリライノブジェクトを返します（ただし，引数にオブジェクトを与えた場合，それはコピーされますので，戻り値のオブジェクトとは一致しません）．</td>
+    </tr>
+    <tr>
+      <td>addPolyline( Object )</td>
+      <td>Ｐｏｌｙｌｉｎｅ</td>
+    </tr>
+    <tr>
+      <td>addPopup( latLng,<br>
+      　content )</td>
+      <td>LatLng,<br>
+      String</td>
+      <td rowspan="2">Popup&nbsp;</td>
+      <td rowspan="2">指定した位置にポップアップウィンドウを追加します．<br>
+      latLngには表示位置をしています．<br>
+      contentには表示させる文字列を指定します．<br>
+      Popupオブジェクトが返されます．&nbsp;</td>
+    </tr>
+    <tr>
+      <td>addPopup( Object )</td>
+      <td>Popup&nbsp;</td>
+    </tr>
+    <tr>
+      <td>layerControl( show )<br>
+      <font color="#ff0000">廃止予定</font></td>
+      <td>Boolean&nbsp;</td>
+      <td>なし</td>
+      <td>レイヤーコントロールを表示（ showがtrueのとき ）または非表示( showがfalseのとき ）<br>
+      <font color="#ff0000">代わりにaddControl, removeControlを使用してください</font></td>
+    </tr>
+    <tr>
+      <td>remove( object )</td>
+      <td>Polyline</td>
+      <td>なし&nbsp;</td>
+      <td>ポリライン，マーカー，ポップアップ，ジオメトリーグループ，オバーレイレイヤー，コントローラーを取り除きます．</td>
+    </tr>
+    <tr>
+      <td>removeControl( control )</td>
+      <td>String | Control&nbsp;</td>
+      <td>なし&nbsp;</td>
+      <td>controlで指定したコントロールを削除します．&nbsp;<br>
+      controlでは，idプロパティの値（'attribution', 'layer', 'scale', 'zoom'等）またはConrol<br>
+      オブジェクト自身が指定できます．</td>
+    </tr>
+    <tr>
+      <td>removeGeometryGroup( geometryGroup )</td>
+      <td>GeometryGroup</td>
+      <td>なし</td>
+      <td>指定したGeometryGroupオブジェクトを削除します．&nbsp;</td>
+    </tr>
+    <tr>
+      <td>removeMarker( marker )</td>
+      <td>Marker&nbsp;</td>
+      <td>なし</td>
+      <td>指定したマーカーを削除します<br>
+      markerを省略すると全てのマーカーを削除します．</td>
+    </tr>
+    <tr>
+      <td>removePolyline( object )</td>
+      <td>Polyline&nbsp;</td>
+      <td>なし&nbsp;</td>
+      <td>指定したポリラインを削除します．&nbsp;<br>
+      引数がポリラインオブジェクトでなければ何もしません．</td>
+    </tr>
+    <tr>
+      <td>removePopup( popup )</td>
+      <td>Popup</td>
+      <td>なし</td>
+      <td>指定したポップアップを削除します．&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+<h3>・メソッド ( そのほか： コントローラ，イベント，位置情報など )</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>addControler( controller )</td>
+      <td>String | Controller</td>
+      <td>Controller&nbsp;</td>
+      <td>戻り値には追加されたコントローラが返されます．追加に失敗するとnullが返されます．<br>
+      コントローラ名には'gamepad' または 'leap'が指定できます．Leafletエンジンではゲームパッドはデフォルトで使用できます．</td>
+    </tr>
+    <tr>
+      <td>cutImage(<br>
+      　bounds,<br>
+      　zoom,<br>
+      　filename,<br>
+      　params)</td>
+      <td>Bounds,<br>
+      Number,<br>
+      String,<br>
+      Object</td>
+      <td>Promise&nbsp;</td>
+      <td>boundsで指定した範囲の，ズームレベルzoomの画像を切り出します．<br>
+      結果はプロミスとして返され，プロミス成功時の引数には画像が描かれたCanvasが渡されます．<br>
+      bounds, zoomは省略でき，省略すると現在表示されている範囲全体とズームレベルとなります．<br>
+      filenameを指定するとクライアント環境にそのファイル名でダウンロードされます（PNG形式）．filenameの拡張子をkmzにすると，kmzファイルとしてダウンロードされます．この場合，さらにparamsパラメータオブジェクトを指定することができ，name,
+      descriptionプロパティがKMZ内のGroundOverlayの&lt;name&gt;要素や&lt;description&gt;要素として書き込まれます（Smap.mapToKMZと同様）．<br>
+      <font color="#ff0000">（2014-10-30現在，画像レイヤー，KMLレイヤーは取得できません）</font></td>
+    </tr>
+    <tr>
+      <td>exec( action,<br>
+      　factor,<br>
+      　timestamp )</td>
+      <td>Object | Function<br>
+      Number,<br>
+      Number</td>
+      <td>なし&nbsp;</td>
+      <td>actionで指定した動作を実行します．<br>
+      主にコントローラから利用されます．<br>
+      actionには動作を指定するオブジェクトまたは関数を，factorにはスピードを調整する係数を，timestampにはタイムスタンプを指定します．<br>
+      詳細は「・<a href="#action">アクション</a>」を参照してください．</td>
+    </tr>
+    <tr>
+      <td>on( type,<br>
+      　handler )</td>
+      <td rowspan="2">String, <br>
+      Function</td>
+      <td rowspan="2">this&nbsp;</td>
+      <td rowspan="2">イベントリスナーを登録<br>
+      <font color="#ff0000">（ただし，Cesiumエンジンでは複数のリスナーを追加できないため，最後に登録したイベントリスナーだけが有効になります）</font><br>
+      addEvnetListnerはonとまったっく同じ機能を提供します．</td>
+    </tr>
+    <tr>
+      <td>addEventListener( type,<br>
+      　handler )</td>
+    </tr>
+    <tr>
+      <td><font color="#ff0000">off( type,<br>
+      　handler )</font></td>
+      <td rowspan="2"><font color="#ff0000">String, <br>
+      Function</font></td>
+      <td rowspan="2"><font color="#ff0000">this&nbsp;</font></td>
+      <td rowspan="2"><font color="#ff0000">イベントリスナーを削除<br>
+      （ただし，Cesiumエンジンでは複数のリスナーを追加できないため，handlerの指定によらず最後に追加したものを削除します）<br>
+      removeEvnetListnerはoffとまったっく同じ機能を提供します．</font></td>
+    </tr>
+    <tr>
+      <td><font color="#ff0000">removeEventListener( type,<br>
+      　handler )</font></td>
+    </tr>
+    <tr>
+      <td>removeController( controller )</td>
+      <td>Controller</td>
+      <td>なし&nbsp;</td>
+      <td>コントローラーを削除します．<br>
+      引数にはコントローラ名か生成したコントローラオブジェクトを指定します．<br>
+      コントローラ名には'gamepad' または 'leap'が指定できます．&nbsp;</td>
+    </tr>
+    <tr>
+      <td>startLocate( options )</td>
+      <td>Object</td>
+      <td>this</td>
+      <td>位置情報の取得を開始します．<br>
+      options.watchにtrueを指定すると位置が変わるたびに位置情報を受け取ります（デフォルトfalse)．options.automoveにtureを指定すると位置取得時に中心を移動します(デフォルトfalse)．options.enableHighAccuracyにtrueを指定すると位置精度が上がります(デフォルトfalse)．<br>
+      位置情報の取得に成功すると'locationfound'イベントが発生し，失敗すると'locationerror'イベントが発生します．<br>
+      ※2016年以降のブラウザでは，http接続の場合セキュリティーエラーが発生することがあります．</td>
+    </tr>
+    <tr>
+      <td>stopLocate()</td>
+      <td>なし</td>
+      <td>this&nbsp;</td>
+      <td>位置情報の取得を終了します．&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+<h3 style="color: rgb(0, 0, 0); font-family: 'MS PGothic'; font-size: medium; font-style: normal; font-variant: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;">・イベント</h3>
+<p style="color: rgb(0, 0, 0); font-family: 'MS PGothic'; font-size: medium; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;">　addEventListner()メソッドでは以下のイベントが扱え，typeプロパティの値として指定できます．</p>
+<blockquote>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>イベント</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>click</td>
+      <td>地図上のクリックまたはタップで発生</td>
+    </tr>
+    <tr>
+      <td>dblclick</td>
+      <td>地図上のクリックまたはダブルタップで発生</td>
+    </tr>
+    <tr>
+      <td>locationfound</td>
+      <td>位置情報が取得された時に発生</td>
+    </tr>
+    <tr>
+      <td>locationerror</td>
+      <td>位置情報取得に失敗した時に発生<br>
+      イベントオブジェクトにはcodeとmessage属性が設定されます．<br>
+      code 0: 不明なエラー，code 1: GolocationAPIの使用が許可されない，<br>
+      code 2: 位置情報が取得できない，code 3: タイムアウトエラー</td>
+    </tr>
+    <tr>
+      <td>mousedown</td>
+      <td>地図上でマウスボタン押されて下がった時に発生</td>
+    </tr>
+    <tr>
+      <td>mouseup</td>
+      <td>地図上でマウスボタン押されて上がった時に発生</td>
+    </tr>
+    <tr>
+      <td>mouseover</td>
+      <td>マウスが地図内に入った時に発生</td>
+    </tr>
+    <tr>
+      <td>mouseout</td>
+      <td>マウスが地図外に出たときに発生</td>
+    </tr>
+    <tr>
+      <td>mousemove</td>
+      <td>マウスが地図内で移動したときに発生</td>
+    </tr>
+    <tr>
+      <td>move</td>
+      <td>マップの表示位置が変化しているときに発生</td>
+    </tr>
+    <tr>
+      <td>movestart</td>
+      <td>マップの表示位置の変化が開始したときに発生</td>
+    </tr>
+    <tr>
+      <td>moveend</td>
+      <td>マップの表示位置の変化が終了したときに発生</td>
+    </tr>
+    <tr>
+      <td>zoomstart</td>
+      <td>ズームレベルの変化の直前に発生(アニメーションの開始時）</td>
+    </tr>
+    <tr>
+      <td>zoomend</td>
+      <td>ズームレベルが変化した後に発生</td>
+    </tr>
+  </tbody>
+</table>
+</blockquote>
+<p style="color: rgb(0, 0, 0); font-family: 'MS PGothic'; font-size: medium; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;">　また，イベントハンドラの引数には，Eventオブジェクトが渡されます．</p>
+<h2><a name="layer" id="layer">Layer</a></h2>
+<p>　Layerオブジェクトは個々のレイヤーを表します．S-mapでは背景とオーバレイを分けて扱いますが，Layerオブジェクトの扱い自体には区別はありません．Map.addOverlay()メソッドで生成と同時に取得するなどして使用します．なお，Mapを生成するファクトリー関数(
+map() )の引数などでLayerオブジェクトを指定する場合は，オブジェクトリテラルとして必要なプロパティを設定するだけで利用できます．</p>
+<h3>・プロパティ</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト</th>
+      <th>生成後</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>attribution</td>
+      <td>String</td>
+      <td>''</td>
+      <td>参照のみ</td>
+      <td>帰属情報<br>
+      html要素を使用できます．</td>
+    </tr>
+    <tr>
+      <td>attributionUrl</td>
+      <td rowspan="2">String&nbsp;</td>
+      <td rowspan="2">''&nbsp;</td>
+      <td rowspan="2">参照のみ&nbsp;</td>
+      <td rowspan="2">帰属情報に紐づけられるリンク先&nbsp;&nbsp;</td>
+    </tr>
+    <tr>
+      <td><font color="#ff0000">attribution_url廃止予定</font></td>
+    </tr>
+    <tr>
+      <td>base</td>
+      <td>Boolean</td>
+      <td>なし&nbsp;</td>
+      <td>参照のみ</td>
+      <td>背景レイヤーとして使用することを明示する場合にtrueを指定します．<br>
+      Map.addBase()やMap.addOverlay()を使用する限りは必要ありません．</td>
+    </tr>
+    <tr>
+      <td>bounds</td>
+      <td>Bounds</td>
+      <td>なし</td>
+      <td>参照のみ</td>
+      <td>レイヤーの地理上の表示範囲を指定します．<br>
+      画像レイヤーでは必須です．&nbsp;</td>
+    </tr>
+    <tr>
+      <td>filetype</td>
+      <td>String&nbsp;</td>
+      <td>なし</td>
+      <td>参照のみ</td>
+      <td>ファイル形式を指定する文字列です．<br>
+      ファイル形式は通常は自動判別されますが，このプロパティを使って明示的に指定することができます．<br>'kml'が指定できます．</td>
+    </tr>
+    <tr>
+      <td>id</td>
+      <td>String</td>
+      <td>''&nbsp;</td>
+      <td>参照のみ</td>
+      <td>レイヤーを識別するためのid<br>
+      CHIRIIN_STD, GOOGLEMAPS_LAD, OPEN_STREET_MAPは予約されています．</td>
+    </tr>
+    <tr>
+      <td>legend</td>
+      <td>[Object, ...]&nbsp;</td>
+      <td>なし</td>
+      <td>setLegend()</td>
+      <td>凡例情報を保持する配列です．<br>
+      getPixelInfo()メソッドで使用します．<br>
+      配列の各要素はそれぞれの凡例単元に相当し，デフォルト設定ではfillプロパティにRGBの16進6桁表現か，またはRGB整数値（R*256*256+G*256+B）を持ちます．</td>
+    </tr>
+    <tr>
+      <td>maxNativeZoom</td>
+      <td>Number</td>
+      <td>なし</td>
+      <td>参照の実</td>
+      <td>タイルソースで利用できる最大ズームレベル．この指定がある場合，この指定値を超えてmaxZoom以下のズームレベルのタイルは，この指定値のズームレベルのタイルを拡大して描画されます．<br>
+      （画像レイヤーKMLでレイヤーでは使用しません）<br>
+      <font color="#ff0000">※Leafletエンジンの場合，boundsを指定すると利用できなくなります．</font><br>
+      <font color="#ff0000">※drawTile()やconvertTile()を記述した場合，Leaflet 0.6.4では動作しません．<br>
+      　Leaflet 0.7.3での動作を確認しています．</font></td>
+    </tr>
+    <tr>
+      <td>maxZoom</td>
+      <td>Number</td>
+      <td>Smap.ZOOM_LIMIT</td>
+      <td>参照のみ</td>
+      <td>最大ズームレベル</td>
+    </tr>
+    <tr>
+      <td>minZoom</td>
+      <td>Number</td>
+      <td>0</td>
+      <td>参照のみ</td>
+      <td>最小ズームレベル</td>
+    </tr>
+    <tr>
+      <td>opacity</td>
+      <td>Number</td>
+      <td>1</td>
+      <td>setOpacity()</td>
+      <td>不透明度（0～1）<br>
+      オブジェクト生成後に値を取得したり変更する場合はsetOpcaity()を使ってください．</td>
+    </tr>
+    <tr>
+      <td>tileSize</td>
+      <td>Number</td>
+      <td>256&nbsp;</td>
+      <td>参照のみ</td>
+      <td>1つのタイルのピクセルサイズです．&nbsp;<br>
+      tilingがtrueの時に有効です．</td>
+    </tr>
+    <tr>
+      <td>tiling</td>
+      <td>Boolean</td>
+      <td>なし&nbsp;</td>
+      <td>参照のみ</td>
+      <td>タイルイング(true)を行うか単独(false)で表示するかを指定します．<br>
+      通常はurlの内容から自動判別されますが，このプロパティを使って明示的にしていすることができます．</td>
+    </tr>
+    <tr>
+      <td>title</td>
+      <td>String</td>
+      <td>''&nbsp;</td>
+      <td>参照のみ</td>
+      <td>レイヤーのタイトル．レイヤーコントローラなどで使用される．&nbsp;</td>
+    </tr>
+    <tr>
+      <td>url</td>
+      <td>String</td>
+      <td>''</td>
+      <td>参照のみ</td>
+      <td>地図画像ファイルのURL</td>
+    </tr>
+    <tr>
+      <td>visibility</td>
+      <td>Boolean</td>
+      <td>true&nbsp;</td>
+      <td>setVisibility()</td>
+      <td>レイヤーの表示状態<br>
+      オブジェクト生成後に値を取得したり変更する場合はsetVisibility()を使ってください．</td>
+    </tr>
+  </tbody>
+</table>
+<p>　urlプロパティでは地図画像ファイルをURLテンプレート(タイルレイヤー）または単独のファイル名（非タイルレイヤー）で指定します．<br>
+　URLテンプレートにはタイルのX, Y座標（グーグルマップの互換）およびズームレベルを{x}, {y}, {z}の形式で埋め込むことができます．また，TMS(Tile Map Service)などで使用される赤道を原点とするY座標は{ye}として使用できます．南西端を原点とする場合のY座標は{ys}で指定できます．その他，任意の変数を{}に挟んで埋め込むことができ，その場合はLayerオブジェクトの内プロパティの値が埋め込まれます．</p>
+<blockquote>※urlプロパティが指定され，かつその中に「{z}」が含まれないとき，単独ファイルが指定されたとみなされます．それ以外はタイルとして描画します．</blockquote>
+<p>　単独のファイル名としては，ラスター画像およびKMLファイルが指定可能です．ラスター画像の場合はその範囲を示すboundsプロパティも設定する必要があります．KMLファイルで利用できる要素は，本来の仕様の一部です（たとえば，ネットワークリンク，アニメーション等は含みません）．また，kmzを利用する場合はJSZipが必要で，中身がdoc.kml単独である場合のみ利用可能です．</p>
+<h4>・メソッド</h4>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>オーバーライド</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>cutImage(<br>
+      　bounds,<br>
+      　zoom,<br>
+      　filename,<br>
+      　params)</td>
+      <td>Bounds,<br>
+      Number,<br>
+      String,<br>
+      Object</td>
+      <td>Promise</td>
+      <td></td>
+      <td>boundsで指定した範囲の，ズームレベルzoomの画像を切り出します．<br>
+      結果はプロミスとして返され，プロミス成功時の引数には画像が描かれたCanvasが返されます．<br>
+      bounds, zoomは省略でき，省略すると現在表示されている範囲全体とズームレベルとなります．<br>
+      filenameを指定するとクライアント環境にそのファイル名でダウンロードされます（PNG形式）．filenameの拡張子をkmzにすると，kmzファイルとしてダウンロードされます．この場合，さらにparamsパラメータオブジェクトを指定することができ，name, descriptionプロパティがKMZ内のGroundOverlayの&lt;name&gt;要素や&lt;description&gt;要素として書き込まれます（Smap.mapToKMZと同様）．<br>
+      <font color="#ff0000">（2014-10-30現在，画像レイヤー，KMLレイヤーでは取得できません）</font></td>
+    </tr>
+    <tr>
+      <td>convertTile( canvas,<br>
+      　coord )</td>
+      <td>Canvas,<br>
+      Coord</td>
+      <td>Promise</td>
+      <td>可</td>
+      <td>Canvasに与えらた画像を表示用に変換<br>
+      初期状態ではこのメソッドは実装されておらず，変換は行いません．<br>
+      ユーザカスタマイズする場合にオーバーライドします．<br>
+      Canvasには，drawTile()メソッドで画像が描かれた状態でこのメソッドが実行されます．<br>
+      処理内に非同期部分を含む場合は，処理がすべて終わった時に成功となるプロミスを返さなければなりません（非同期部分を含まない場合は必要ありません）．</td>
+    </tr>
+    <tr>
+      <td>drawTile( canvas,<br>
+      　coord )</td>
+      <td>Canvas,<br>
+      Coord</td>
+      <td>Promise</td>
+      <td>可</td>
+      <td>通常の画像ファイルの描画の代わりに，canvasに直接描画<br>
+      初期状態では，coordに対応したタイルをそのまま描画します．<br>
+      ユーザカスタマイズする場合にオーバーライドします．<br>処理内に非同期部分を含む場合は，処理がすべて終わった時に成功となるプロミスを返さなければなりません（非同期部分を含まない場合は必要ありません）．</td>
+    </tr>
+    <tr>
+      <td>get( key )</td>
+      <td>String</td>
+      <td>Layer | Eney</td>
+      <td>&nbsp;</td>
+      <td>keyをパラメータとするレイヤーのプロパティを取得します．</td>
+    </tr>
+    <tr>
+      <td>getLegend()</td>
+      <td>なし</td>
+      <td>[ Object... ]&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>レジェンドを返します．</td>
+    </tr>
+    <tr>
+      <td>getOpacity()</td>
+      <td>なし</td>
+      <td>Number&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>レイヤーの不透明度を返します．</td>
+    </tr>
+    <tr>
+      <td>getPixel( latLng, 　zoom )</td>
+      <td>LatLng, Number</td>
+      <td>Promise</td>
+      <td></td>
+      <td>緯度経度に対応するピクセルのRGB値色を取得するプロミスを発行．<br>
+      取得は非同期に行われます．プロミス成功時の引数にはサイズ4の配列(RGBAの値を保持)が与えられます（ただし，単独のラスター画像を使用している場合，画像範囲を超えるとnullが与えられます）．<br>
+      タイルレイヤーの場合，相当するタイル画像がない場合はプロミスが失敗します．<br>
+      <font color="#ff0000">※iPadなど一部のデバイスでは画像ファイルが大きすぎる(400kb以上？）と取得に失敗しますが，この場合エラーは発生せず[0, 0, 0, 0]が返ります．</font></td>
+    </tr>
+    <tr>
+      <td>getPixelRGB( latLng, 　zoom )</td>
+      <td>LatLng, Number</td>
+      <td>Promise&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>緯度経度に対応するピクセルの色を取得するプロミスを発行．<br>
+      取得は非同期に行われます．プロミス成功時の引数にはRGB整数値（色を24bit整数に変換したもの，R*256*256+G*256+B）の値が与えられます（ただし，単独のラスター画像を使用している場合，画像範囲を超えるとnullが与えられます）．<br>タイルレイヤーの場合，相当するタイル画像がない場合はプロミスが失敗します．</td>
+    </tr>
+    <tr>
+      <td>getPixelInfo( latLng,<br>
+      　zoom<br>
+      　test )<br>
+      <font color="#ff0000">2014-10-23仕様変更</font></td>
+      <td>LatLng,<br>
+      Number,<br>
+      function</td>
+      <td>Promise</td>
+      <td></td>
+      <td>緯度経度に対応するピクセル情報を取得するプロミスを発行．<br>
+      取得は非同期に行われます．プロミス成功時の引数には凡例情報オブジェクトが与えられます．<br>
+      凡例情報オブジェクトはlegendプロパティで与えられた配列から検索し，デフォルトではfillフィールドがピクセルの色(RGBの16進6桁表示またはRGB整数値)と一致するものを返します．testでは別の条件式を関数で設定できます．test()関数は第1引数に凡例情報オブジェクト，第2に引数RGB整数値（=R*256*256+G*256+B)を受けとり一致する場合にtrueを返す関数を指定します．</td>
+    </tr>
+    <tr>
+      <td>getTileUr( coord )</td>
+      <td>Coord</td>
+      <td>0</td>
+      <td>可</td>
+      <td>URLテンプレートをもとにタイル座標からタイルURLを生成</td>
+    </tr>
+    <tr>
+      <td>getUrl()</td>
+      <td>なし</td>
+      <td>String&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>レイヤーのurlテンプレートを取得</td>
+    </tr>
+    <tr>
+      <td>getVisibility()</td>
+      <td>なし&nbsp;</td>
+      <td>Boolean</td>
+      <td>&nbsp;</td>
+      <td>レイヤーが表示状態ならTrueを返します．</td>
+    </tr>
+    <tr>
+      <td>redraw()</td>
+      <td>なし</td>
+      <td>this</td>
+      <td></td>
+      <td>レイヤーを再描画します</td>
+    </tr>
+    <tr>
+      <td>set( params,<br>
+      　value )</td>
+      <td>Object | String,<br>
+      Eney</td>
+      <td>Layer | Eney</td>
+      <td></td>
+      <td>レイヤーのプロパティをセット<br>
+      paramsがオブジェクトの場合，連想配列と解釈して各プロパティとその値を設定し，自分自身を返します．<br>
+      paramsが文字列の場合，paramsをプロパティ名として，(指定されていれば)valueを設定し，最終的なプロパティ値を返します．<br>
+      セット後に内部でredraw()が呼ばれます</td>
+    </tr>
+    <tr>
+      <td>setLegend( legend )</td>
+      <td>[ Object... ] |<br>
+      String</td>
+      <td>[ Object... ]&nbsp;</td>
+      <td></td>
+      <td>レジェンドを設定し，最終的なレジェンドを返します．引数に文字列を指定した場合は，JSONファイルとして読み込みます．</td>
+    </tr>
+    <tr>
+      <td>setOpacity( opacity )&nbsp;</td>
+      <td>Number</td>
+      <td>Number&nbsp;</td>
+      <td></td>
+      <td>不透明度を設定（引数を指定した場合）し，最終的な不透明度を返します</td>
+    </tr>
+    <tr>
+      <td>setUrl( url )</td>
+      <td>String</td>
+      <td>String&nbsp;</td>
+      <td></td>
+      <td>レイヤーのurlテンプレートをセット</td>
+    </tr>
+    <tr>
+      <td>setVisibility( visibility )</td>
+      <td>Boolean</td>
+      <td>Boolean</td>
+      <td></td>
+      <td>レイヤーの表示・非表示をセット<br>
+      すでに背景レイヤーまたはオーバーレイレイヤーとして登録されている場合のみ有効</td>
+    </tr>
+  </tbody>
+</table>
+<p>※「オーバーライド」に「可」としたメソッドは，オーバーライドすることにより動作を変更できます．ただし，オーバーライドはメソッド生成時（map()関数，addBase()関数,
+addOverlay()関数呼び出し時）にのみ行えます．</p>
+<h2><a name="marker" id="marker">Marker</a></h2>
+<p>　Markerオブジェクトは地図上に表示するマーカーを表します．Makerオブジェクトの生成は，Map.addMarker()メソッドでお行います．</p>
+<h3>・プロパティ</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト</th>
+      <th>生成後</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>latLng</td>
+      <td>LatLng</td>
+      <td>必須</td>
+      <td>setLatLng()</td>
+      <td>ポップアップを表示する地理上の位置<br>
+      <font color="#ff0000">(Cesiumエンジンでは参照のみ)</font></td>
+    </tr>
+    <tr>
+      <td>draggable</td>
+      <td>Boolean&nbsp;</td>
+      <td>false</td>
+      <td>参照のみ</td>
+      <td>ドラッグ可能とするか否か<font color="#ff0000">(Leafletエンジンのみ)</font></td>
+    </tr>
+    <tr>
+      <td>icon</td>
+      <td>Icon</td>
+      <td>なし&nbsp;</td>
+      <td>参照のみ</td>
+      <td>マーカーアイコン<font color="#ff0000">(Leafletエンジンのみ)</font></td>
+    </tr>
+    <tr>
+      <td>opacity</td>
+      <td>Number&nbsp;</td>
+      <td>1</td>
+      <td>setOpacity</td>
+      <td>不透明度&nbsp;<font color="#ff0000">(Leafletエンジンのみ)</font></td>
+    </tr>
+    <tr>
+      <td>original</td>
+      <td>Object</td>
+      <td>なし</td>
+      <td>参照のみ&nbsp;</td>
+      <td>（存在すれば）地図ライブラリが生成する固有のオブジェクトです．</td>
+    </tr>
+    <tr>
+      <td>vsibility</td>
+      <td>Boolean</td>
+      <td>true</td>
+      <td>setVisiblity</td>
+      <td>表示するか&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+<h3>・メソッド</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>closePopup()</td>
+      <td>なし</td>
+      <td>this</td>
+      <td>ポップアップウィンドウを閉じます<font color="#ff0000">(Leafletエンジンのみ)</font>．</td>
+    </tr>
+    <tr>
+      <td>get( key )</td>
+      <td>String</td>
+      <td>Eney</td>
+      <td>keyをプロパティ名とするプロパティ値を返します．</td>
+    </tr>
+    <tr>
+      <td>getLatLng()</td>
+      <td>なし</td>
+      <td>LatLng</td>
+      <td>表示位置を返します．</td>
+    </tr>
+    <tr>
+      <td>getOpacity()</td>
+      <td>なし</td>
+      <td>Number</td>
+      <td>不透明度を返します<font color="#ff0000">(Leafletエンジンのみ)</font>．</td>
+    </tr>
+    <tr>
+      <td>getPopup()</td>
+      <td>なし</td>
+      <td>Popup</td>
+      <td>関連付けれらたPopupオブジェクトを返します．<font color="#ff0000">(Leafletエンジンのみ)</font></td>
+    </tr>
+    <tr>
+      <td>getVisibility()</td>
+      <td>なし</td>
+      <td>Boolean&nbsp;&nbsp;</td>
+      <td>マーカーが表示状態ならばTrueを返します．</td>
+    </tr>
+    <tr>
+      <td>on( type,<br>
+      　handler )</td>
+      <td rowspan="2">String,<br>
+      Function</td>
+      <td rowspan="2">this</td>
+      <td rowspan="2">イベントリスナーを登録．<font color="#ff0000">(Leafletエンジンのみ)</font><br>
+      addEventListenerはonと全く同じ機能を提供します．&nbsp;</td>
+    </tr>
+    <tr>
+      <td>addEventListener( type,<br>
+      　handler )</td>
+    </tr>
+    <tr>
+      <td>openPopup()</td>
+      <td>なし</td>
+      <td>this</td>
+      <td>ポップアップウィンドウを表示します<font color="#ff0000">(Leafletエンジンのみ)</font><br>
+      表示する内容は，Marker生成時にpamras.popupプロパティで設定しておく必要があります．</td>
+    </tr>
+    <tr>
+      <td>set( key,<br>
+      　value )</td>
+      <td>String,<br>
+      Eney&nbsp;</td>
+      <td>Eney</td>
+      <td>このオブジェクトのプロパティ値をセット<br>
+      keyをプロパティ名として，(指定されていれば)valueを設定し，最終的なプロパティ値を返します．<br>
+      プロパティ名には，'latLng', 'opacity', 'popup', 'visibilityが指定できます．</td>
+    </tr>
+    <tr>
+      <td>setLatLng( latLng )</td>
+      <td>LatLng</td>
+      <td>LatLng</td>
+      <td>表示する位置を変更します<font color="#ff0000">(Leafletエンジンのみ)</font><br>
+      引数は省略することができ，省略すると現在設定されている位置返します</td>
+    </tr>
+    <tr>
+      <td>setOpacity( opacity )</td>
+      <td>Number</td>
+      <td>Number</td>
+      <td>不透明度を設定します．<font color="#ff0000">(Leafletエンジンのみ)</font><br>
+      引数は省略することができ，省略すると現在設定されている不透明度を返します&nbsp;</td>
+    </tr>
+    <tr>
+      <td>setPopup( popup )</td>
+      <td>Popup</td>
+      <td>Popup</td>
+      <td>ポップアップで表示するオブジェクトを設定します．<font color="#ff0000">(Leafletエンジンのみ)</font><br>
+      引数は省略することができ，省略すると現在設定されているオブジェクトを返します</td>
+    </tr>
+    <tr>
+      <td>setVisibility( visibility )</td>
+      <td>Boolean</td>
+      <td>Boolean</td>
+      <td>表示するか．<br>
+      引数は省略でき，省略すると現在表示されているか否かを返します．&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+<h4>・イベント</h4>
+<p>　on()およびaddEvnetListener()メソッドでは以下のイベントが扱えます．typeプロパティの値として以下が指定できます<font color="#ff0000">(Leafletエンジンのみ)</font>．</p>
+<blockquote>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>イベント</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>click</td>
+      <td>マーカー上のクリックまたはタップで発生</td>
+    </tr>
+    <tr>
+      <td>dblclick</td>
+      <td>マーカー上のクリックまたはダブルタップで発生</td>
+    </tr>
+    <tr>
+      <td>mousedown</td>
+      <td>マーカー上でマウスボタン押されて下がった時に発生</td>
+    </tr>
+    <tr>
+      <td>mouseup</td>
+      <td>マーカー上でマウスボタン押されて上がった時に発生</td>
+    </tr>
+    <tr>
+      <td>mousemove</td>
+      <td>マウスが地図内で移動したときに発生</td>
+    </tr>
+    <tr>
+      <td>dragstart</td>
+      <td>ドラッグの移動が開始されたときに発生</td>
+    </tr>
+    <tr>
+      <td>drag</td>
+      <td>ドラッグしているときに発生</td>
+    </tr>
+    <tr>
+      <td>dragend</td>
+      <td>ドラッグの移動が終了したときに発生</td>
+    </tr>
+    <tr>
+      <td>move</td>
+      <td>マーカーの位置が変化しているときに発生</td>
+    </tr>
+  </tbody>
+</table>
+</blockquote>
+<h2><a name="icon" id="icon">Icon</a></h2>
+<p>　Iconオブジェクトはマーカーで使用する画像を表します<font color="#ff0000">(Leafletエンジンのみ)</font>．Iconオブジェクトの生成は，Map.addMarker()の中で，parms.iconプロパティの設定をもとに行なわれます．</p>
+<h3>・プロパティ</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>url</td>
+      <td>String</td>
+      <td>必須</td>
+      <td>画像ファイルの絶対または相対パスを指定します</td>
+    </tr>
+    <tr>
+      <td>size</td>
+      <td>Point</td>
+      <td>なし</td>
+      <td>アイコンのサイズをピックセルで指定します</td>
+    </tr>
+    <tr>
+      <td>anchor</td>
+      <td>Point</td>
+      <td>なし</td>
+      <td>アンカーの位置を左上を原点とする座標値で指定します</td>
+    </tr>
+  </tbody>
+</table>
+<h2><a name="popup" id="popup">Popup</a></h2>
+<p>　Popupオブジェクトは地図上にポップアップ(吹き出し）を表示します<font color="#ff0000">(Leafletエンジンのみ)</font>．Popupの生成はMap.add()またはMap.addPopup()メソッドで行います．削除はMap.remove()またはMap.removePopup()オブジェクトで行います．<br>
+　なお，S-mapでは，ポップアップは常に1つしか表示されません．<br>
+　Markerに直接関連付けるポップアップを表示するときは，Marakerのpopupプロパティを使います．</p>
+<h3>・プロパティ</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>latLng</td>
+      <td>LatLng</td>
+      <td>必須</td>
+      <td>ポップアップを表示する地理上の位置</td>
+    </tr>
+    <tr>
+      <td>content</td>
+      <td>String</td>
+      <td>必須</td>
+      <td>アイコンのサイズをピックセルで指定します</td>
+    </tr>
+    <tr>
+      <td>autoPan</td>
+      <td>Boolean</td>
+      <td>true</td>
+      <td>falseを指定するとポップアップ表示時に地図の移動が発生しません．&nbsp;</td>
+    </tr>
+    <tr>
+      <td>original</td>
+      <td>Object</td>
+      <td>なし</td>
+      <td>（存在すれば）地図ライブラリが生成する固有のオブジェクトです．</td>
+    </tr>
+  </tbody>
+</table>
+<h3>・メソッド</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>getOpen()</td>
+      <td>なし</td>
+      <td>Boolean</td>
+      <td>現在開かれていればtrueを返します．</td>
+    </tr>
+    <tr>
+      <td>setOpen( open )</td>
+      <td>Boolean</td>
+      <td>Boolean</td>
+      <td>ポップアップを開く(openがtrue)ないし閉じ(openがfalse)ます</td>
+    </tr>
+  </tbody>
+</table>
+<h2><a name="polyline" id="polyline">Polyline</a></h2>
+<p>　Polylineオブジェクトは地図上に描画するポリライン（ポリゴンを含む）を表します．Polylineの生成は，Map.add()または，Map.addPolyline()で行います．削除はMap.remove()またはMap.removePolyline()メソッドで行います．</p>
+<h3>・プロパティ</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト</th>
+      <th>生成後</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>close</td>
+      <td>Boolean</td>
+      <td>false</td>
+      <td>参照のみ</td>
+      <td>始点と終点をつなぐ（ポリゴン）かいなかを指定します</td>
+    </tr>
+    <tr>
+      <td>latLngs</td>
+      <td>[ latLng, ... ]</td>
+      <td>必須</td>
+      <td>setLatLngs()<br>
+      addLatLng()</td>
+      <td>地理上の点の配列を与えます</td>
+    </tr>
+    <tr>
+      <td>style</td>
+      <td>Style</td>
+      <td>なし</td>
+      <td>参照のみ</td>
+      <td>描画スタイルを設定します</td>
+    </tr>
+    <tr>
+      <td>original</td>
+      <td>Object</td>
+      <td>なし&nbsp;</td>
+      <td>参照のみ</td>
+      <td>（存在すれば）地図ライブラリが生成する固有のオブジェクトです．<br>
+      add()またはaddPolyline()メソッドで地図上に追加された際に，S-mapにより設定されます</td>
+    </tr>
+    <tr>
+      <td>visibility</td>
+      <td>Booelan&nbsp;</td>
+      <td>true&nbsp;</td>
+      <td>setVisibility()</td>
+      <td>表示状態</td>
+    </tr>
+  </tbody>
+</table>
+<h3>・メソッド</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>on( type<br>
+      　handler )</td>
+      <td rowspan="2">String<br>
+      function</td>
+      <td rowspan="2">this</td>
+      <td rowspan="2">イベントリスナーを登録<br>
+      addEvnetListnerはonとまったっく同じ機能を提供する&nbsp;<br>
+      <font color="#ff0000">(Leafletエンジンのみ)</font></td>
+    </tr>
+    <tr>
+      <td>addEventListener( type,<br>
+      　handler )</td>
+    </tr>
+    <tr>
+      <td>addLatLng</td>
+      <td>LatLng | [ Number, Number ]</td>
+      <td>LatLng&nbsp;</td>
+      <td>点を追加し，追加した点を返します．</td>
+    </tr>
+    <tr>
+      <td>get( key )</td>
+      <td>String</td>
+      <td>Eney</td>
+      <td>keyをプロパティ名とするプロパティ値を返します．</td>
+    </tr>
+    <tr>
+      <td>getVisibility()</td>
+      <td>なし</td>
+      <td>Booean</td>
+      <td>表示状態を返します．</td>
+    </tr>
+    <tr>
+      <td>getLatLngs()</td>
+      <td>なし</td>
+      <td>[ latLng, ... ]&nbsp;</td>
+      <td>設定されている地理上の点の配列を返します．</td>
+    </tr>
+    <tr>
+      <td>set( key,<br>
+      　value )</td>
+      <td>String,<br>
+      Eney</td>
+      <td>Eney</td>
+      <td>このオブジェクトのプロパティ値をセット<br>
+      keyをプロパティ名として，(指定されていれば)valueを設定し，最終的なプロパティ値を返します．<br>
+      プロパティ名には，'latLngs', 'visibility'が指定できます．</td>
+    </tr>
+    <tr>
+      <td>setVisibility( visibility )</td>
+      <td>Boolean</td>
+      <td>Boolean</td>
+      <td>表示するか否かを指定します．<br>
+      引数は省略でき，省略すると現在表示されているか否かを返します．&nbsp;</td>
+    </tr>
+    <tr>
+      <td>setLatLngs( latLngs )</td>
+      <td>[ LatLng, ... ]</td>
+      <td>[ latLng, ... ]</td>
+      <td>地理上の点の配列を設定します．<br>
+      引数を省略すると現在設定されている配列を返します．</td>
+    </tr>
+  </tbody>
+</table>
+<h2><a name="style" id="style">Style</a></h2>
+<p>　StyleオブジェクトはPolylineのスタイルを設定します．</p>
+<h3>・プロパティ</h3>
+<table border="1" cellspacing="0" style="font-family: 'MS PGothic'; letter-spacing: normal; orphans: auto; text-indent: 0px; text-transform: none; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>stroke</td>
+      <td>String</td>
+      <td>'#000'</td>
+      <td>ストロークの色または'none'(線を描画しない)</td>
+    </tr>
+    <tr>
+      <td>strokeOpacity</td>
+      <td>Number</td>
+      <td>1</td>
+      <td>ストロークの不透明度</td>
+    </tr>
+    <tr>
+      <td>strokeWidth</td>
+      <td>Number</td>
+      <td>1</td>
+      <td>ピクセル単位のストロークの幅</td>
+    </tr>
+    <tr>
+      <td>dashArray</td>
+      <td>String</td>
+      <td>nrull</td>
+      <td>ストロークダッシュパターン</td>
+    </tr>
+    <tr>
+      <td>fill</td>
+      <td>String</td>
+      <td>'none'</td>
+      <td>塗りつぶしの色または'none'(パス内を塗りつぶさない)</td>
+    </tr>
+    <tr>
+      <td>fillOpacity</td>
+      <td>Number</td>
+      <td>1</td>
+      <td>塗りつぶしの不透明度</td>
+    </tr>
+    <tr>
+      <td>lineCap</td>
+      <td>String</td>
+      <td>null</td>
+      <td>ストロークの端で使われる形</td>
+    </tr>
+    <tr>
+      <td>lineJoin</td>
+      <td>String</td>
+      <td>null</td>
+      <td>ストロークの曲がり角で使われる形</td>
+    </tr>
+  </tbody>
+</table>
+<h2><a name="geometrygroup" id="geometrygroup">GeometryGroup</a></h2>
+<p>　GeometryGroupオブジェクトは地図上に描画する複数のオブジェクト（マーカー，ポップアップ，ポリライン，イメージ）をまとめるためのジオメトリーグループを表現します．GeometryGroupの生成は，Map.add()または，Map.addGeometryGroup()メソッドで行います．削除はMap.remove()またはMap.removeGeometry()メソッドで行います．</p>
+<h3>・プロパティ</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト</th>
+      <th>生成後</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>geometries</td>
+      <td>[ Object, ... ]</td>
+      <td>[]</td>
+      <td>add(), remove()</td>
+      <td>登録したGeometryの配列</td>
+    </tr>
+    <tr>
+      <td>visibility</td>
+      <td>Booelan&nbsp;</td>
+      <td>true&nbsp;</td>
+      <td>setVisibility()</td>
+      <td>表示状態</td>
+    </tr>
+  </tbody>
+</table>
+<h3>・メソッド</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>add( geometry )</td>
+      <td>Object</td>
+      <td>Object</td>
+      <td>新しい描画オブジェクトを追加します．<br>
+      引数にはオブジェクトを表現するリテラルを指定でき，指定方法はMap.add()メソッドと同様です．<br>
+      戻り値には追加されたオブジェクトを返します．</td>
+    </tr>
+    <tr>
+      <td>getVisibility()</td>
+      <td>なし</td>
+      <td>Boolean&nbsp;</td>
+      <td>ジオメトリーグループが表示状態ならばTrueを返します．</td>
+    </tr>
+    <tr>
+      <td>remove( geometry )</td>
+      <td>Object</td>
+      <td>なし</td>
+      <td>追加した描画オブジェクトを削除します．<br>
+      引数を省略するとすべてのオブジェクトを削除します．</td>
+    </tr>
+    <tr>
+      <td>setVisibility( visibility )</td>
+      <td>Boolean</td>
+      <td>Boolean</td>
+      <td>表示するか否かを指定します．<br>
+      引数は省略でき，省略すると現在表示されているか否かを返します．&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+<h2><a name="control" id="control">Control<br>
+</a></h2>
+<p>　Controlオブジェクトは地図上に固定位置に表示されるもので，ユーザに情報を提供したり，ユーザからの入力を受け取ったりするために使用するものです．デフォルトで，アトリビューション，レイヤー，スケール，ズームの4つのコントロールが提供され，さらにユーザ独自のコントロールを追加することも可能です．<br>
+　通常はMap.addControl()関数の引数にコントローラ名を指定して生成します．</p>
+<h3>・プロパティ</h3>
+<table border="1" cellspacing="0" style="font-family: 'MS PGothic'; letter-spacing: normal; orphans: auto; text-indent: 0px; text-transform: none; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>id</td>
+      <td>String</td>
+      <td>なし</td>
+      <td>コントロール名で必須です．<br>
+      既定のコントロールの場合は'attribution', 'layer', 'scale', 'zoom'となります．<br>
+      ユーザー定義のコントロールの場合は上記以外を指定します．</td>
+    </tr>
+    <tr>
+      <td>contents</td>
+      <td>HTMLElement</td>
+      <td></td>
+      <td>ユーザ定義のコントロールの場合，表示するHTMLエレメントオブジェクトを表します．</td>
+    </tr>
+    <tr>
+      <td>original</td>
+      <td>Object</td>
+      <td>&nbsp;</td>
+      <td>（存在すれば）地図描画エンジンが生成する固有のオブジェクトです．</td>
+    </tr>
+    <tr>
+      <td>position</td>
+      <td>String</td>
+      <td></td>
+      <td>表示位置を'topleft', 'topright', 'bottomleft', 'bottomright'で表します．</td>
+    </tr>
+  </tbody>
+</table>
+<h2><a name="controller" id="controller">Controller<br>
+</a></h2>
+<p>　Controllerオブジェクトは，ゲームパッドやLeap Motionなどの入力デバイスを表現します．デフォルトではゲームパッドとLeap
+Motionのコントローラが組み込まれています．新たなコントローラを追加して利用することもでき，その場合はMap.addController()メソッドを使って追加します．Mapに追加されているコントローラはMap.controllers[
+コントローラ ]名で取得でき，Map.removeController()で削除することができます．</p>
+<h3>・プロパティ</h3>
+<table border="1" cellspacing="0" style="font-family: 'MS PGothic'; letter-spacing: normal; orphans: auto; text-indent: 0px; text-transform: none; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>active</td>
+      <td>Boolean</td>
+      <td>true</td>
+      <td>コントローラを有効にするか否か</td>
+    </tr>
+    <tr>
+      <td>assign</td>
+      <td>Object&nbsp;</td>
+      <td>なし&nbsp;</td>
+      <td>操作に対する動作の割り当てを，オペレーション名をキーとし，動作を指定する<a href="#action">アクションオブジェクト</a>または関数を値とするする連想配列で指定します．関数を指定した場合は，操作に対して関数自身が実行されます．関数に渡される引数はとてオブジェクトで，factor(変位量)，timestamp(タイムスタンプ）をフィールドに持ちます．</td>
+    </tr>
+    <tr>
+      <td>id</td>
+      <td>String</td>
+      <td>なし</td>
+      <td>コントローラー名．一意に識別できる必要があります．<br>
+      組み込みのコントローラ名は'gamepad'または'leap'です．</td>
+    </tr>
+  </tbody>
+</table>
+<h3>・メソッド</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>check( )</td>
+      <td>無し</td>
+      <td>無し</td>
+      <td>デバイスの状態を確認して，必要な再描画処理を行います．<br>
+      S-map内のループから随時呼び出されます．</td>
+    </tr>
+  </tbody>
+</table>
+<h4>・コマンドアサインのオペレーション</h4>
+<p>　利用できるオペレーション名はコントローラにより異なります．<br>
+　ゲームパッドでは以下のオペレーションが利用できます．オペレーションの名称はGamepadAPIに準じています．</p>
+<ul>
+  <li>button0　...　Aボタン
+  <li>button1　...　Bボタン
+  <li>button2　...　Xボタン
+  <li>button3　...　Yボタン
+  <li>button4　...　LBボタン
+  <li>button5　...　RBボタン
+  <li>button6　...　LTボタン
+  <li>button7　...　RTボタン
+  <li>button8　...　BACKボタン
+  <li>button9　...　STARTボタン
+  <li>button10　...　右スティック押し込み
+  <li>button11　...　右スティック押し込み
+  <li>button12　...　上ボタン
+  <li>button13　...　下ボタン
+  <li>button14　...　左ボタン
+  <li>button15　...　右ボタン
+  <li>button16　...　中央ボタン
+  <li>axes0　...　左スティック水平方向（右が正）
+  <li>axes1　...　左スティック垂直方向（上が正）
+  <li>axes2　...　右スティック水平方向（右が正）
+  <li>axes3　...　右スティック垂直方向（上が正）
+</ul>
+<p>　Leap Motionコントローラは以下のオペレーションをサポートします．</p>
+<ul>
+  <li>移動系
+  <ul>
+    <li>palamPositionX　...　手の位置
+    <li>palamPositionY
+    <li>palamPositionZ
+  </ul>
+  <li>回転系
+  <ul>
+    <li>palmNormX　...　手のひらの法線ベクトル
+    <li>palmNormY
+    <li>palmNormZ
+    <li>directionX　...　指先のベクトル
+    <li>directionY
+    <li>directionZ
+  </ul>
+  <li>サイン系
+  <ul>
+    <li>oneFinger　...　1本指
+    <li>firsetFinger　...　人差し指
+    <li>twoFingers　...　2本指
+    <li>scissors　...　チョキ
+  </ul>
+</ul>
+<h4><a name="action">・アクションオブジェクト</a></h4>
+<p>　アクションオブジェクトは，commandとvelocityの2つのプロパティを持ったオブジェクトで，commandプロパティで動作の種類を，velocityで動作速度を調整します．commandでは以下が指定できます（描画エンジンによっては利用できないものもあります）．</p>
+<ul>
+  <li>near　... 近づく
+  <li>moveX ... 横方向の移動（右が正）
+  <li>moveY ... 縦方向の移動（上が正）
+  <li>moveZ ... 上下方向の移動（下が正）
+  <li>rollX ... 横方向回転（未実装）
+  <li>rollY　.. 縦方向回転（未実装）
+  <li>rollCameraX　... カメラの向きの横方向水平回転
+  <li>rollCameraY　... カメラの向きの縦方向垂直回転
+  <li>resetView　...　カメラの位置と向きを初期状態に戻す（Map.reset()を呼び出します）
+</ul>
+<p>　実際の動作速度は，デバイスから取得した変位量factorとコマンドアサインで指定したvelocityを乗算した値で決まります．factor,velocityという名前はついていますが，これはゲームパッドを想定してつけられており，実際の役割はコントローラにより異なります．Leap
+Motionの場合はfactorが距離や回転角を表し，velocityはそれを補正するための係数の役割を持ちます．<br>
+<br>
+　デフォルトのコマンドアサインを変更するには，コントローラオブジェクトを取得してそのassignプロパティを書き換えます．</p>
+<blockquote>※指定したアクションオブジェクトは，そのままMap.exec()関数の第1引数actionに渡されます．</blockquote>
+<h2><a name="elevationLayer" id="elevationLayer">ElevationLayer</a></h2>
+<p><font color="#ff0000">廃止予定　ElevatonModelに機能を吸収する予定</font></p>
+<p>　標高を扱うための専用オブジェクトです．通常のレイヤーと異なり，Mapとは独立して利用します．<br>
+　現在の実装ではPNG標高タイルのみを扱えます．</p>
+<h3>・ファクトリー関数</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>関数</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>Smap.elevationLayer( url )</td>
+      <td>String</td>
+      <td>ElevationLayer&nbsp;&nbsp;</td>
+      <td>ElevationLayerオブジェクト生成します．</td>
+    </tr>
+  </tbody>
+</table>
+<h3>・プロパティ</h3>
+<table border="1" cellspacing="0" style="font-family: 'MS PGothic'; letter-spacing: normal; orphans: auto; text-indent: 0px; text-transform: none; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>url</td>
+      <td>String</td>
+      <td>Smap.DEFAULT_ELEVATION</td>
+      <td>標高タイルのURLテンプレート</td>
+    </tr>
+  </tbody>
+</table>
+<p>標高タイルのテンプレートでは，タイル座標を指定するための{x}, {y}, {z}のほか位置精度を指定する{type}が使用できます．この{type}には，標高取得時に'm'(m精度)または'cm'(cm精度)が設定されます．</p>
+<h3>・メソッド</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>getElevation(　latln,<br>
+      　z<br>
+      　params )</td>
+      <td>LatLng,<br>
+      Number,　Object</td>
+      <td>Promise&nbsp;</td>
+      <td>指定した位置とズームレベルの標高を取得するプロミスを発行します．<br>
+      params.typeには高さの精度を指定する文字列を指定します<br>
+      （'m': m精度, 'cm':cm精度，デフォルトは'm'）<br>
+      プロミス成功時には，標高（m単位)が引数として渡されます．</td>
+    </tr>
+  </tbody>
+</table>
+<h2><a name="elevationModel" id="elevationModel">ElevationModel</a></h2>
+<p><font color="#000000">　標高モデルを扱うためオブジェクトです．現在の実装ではPNG標高タイルのみを扱えます．</font></p>
+<h3><font color="#000000">・プロパティ</font></h3>
+<table border="1" cellspacing="0" style="font-family: 'MS PGothic'; letter-spacing: normal; orphans: auto; text-indent: 0px; text-transform: none; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;">
+  <tbody>
+    <tr>
+      <th><font color="#000000">プロパティ</font></th>
+      <th><font color="#000000">型</font></th>
+      <th><font color="#000000">デフォルト</font></th>
+      <th><font color="#000000">説明</font></th>
+    </tr>
+    <tr>
+      <td><font color="#000000">url</font></td>
+      <td><font color="#000000">String</font></td>
+      <td><font color="#000000">(必須)</font></td>
+      <td><font color="#000000">標高タイルのURLテンプレート．ズームレベル及びタイル座標として{z},{x},{y}を使用できる</font></td>
+    </tr>
+    <tr>
+      <td><font color="#000000">resolution</font></td>
+      <td><font color="#000000">Number&nbsp;</font></td>
+      <td><font color="#000000">1</font></td>
+      <td><font color="#000000">標高分解能(メートル)</font></td>
+    </tr>
+    <tr>
+      <td><font color="#000000">dataMapSize</font></td>
+      <td><font color="#000000">Number&nbsp;</font></td>
+      <td><font color="#000000">33</font></td>
+      <td><font color="#000000">タイルサイズ(ピクセル)</font></td>
+    </tr>
+    <tr>
+      <td>hf</td>
+      <td>Number&nbsp;</td>
+      <td>1&nbsp;</td>
+      <td>地形の強調係数&nbsp;（1で強調無し）</td>
+    </tr>
+    <tr>
+      <td><font color="#ff0000">projection</font></td>
+      <td><font color="#ff0000">String</font></td>
+      <td><font color="#ff0000">webmelcator</font></td>
+      <td><font color="#ff0000">'latlng'を指定すると正距円筒図法となります&nbsp;</font></td>
+    </tr>
+  </tbody>
+</table>
+<p><font color="#000000">dataMapSizeは，レンダリングに使用するデータマップのサイズで，画像サイズに一致している必要は無く，S-mapがリサンプルします．tileSizeが(実際の画像サイズ-1)と一致するとき最も効率が良くなります（左と下のタイルとの接合部の標高も必要とするため）．</font></p>
+<h3><font color="#000000">・メソッド</font></h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th><font color="#000000">メソッド</font></th>
+      <th><font color="#000000">引数の型</font></th>
+      <th><font color="#000000">戻り値</font></th>
+      <th><font color="#000000">説明</font></th>
+    </tr>
+    <tr>
+      <td><font color="#000000">getElevation(　latln,<br>
+      　z )</font></td>
+      <td><font color="#000000">LatLng,<br>
+      Number</font></td>
+      <td><font color="#000000">Promise&nbsp;</font></td>
+      <td><font color="#000000">指定した位置とズームレベルの標高を取得するプロミスを発行します．<br>
+      プロミス成功時には，標高（m単位)が引数として渡されます．</font></td>
+    </tr>
+  </tbody>
+</table>
+<h2><a name="geocoder" id="geocoder">Geocorder</a></h2>
+<p>　地名等と緯度経度の変換を行うジオコーダオブジェクトです．自分自身で地名検索をするほか，別のGeocoderをリストとして保持してそちらに検索させることもできます．</p>
+<h3>・ファクトリー関数</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>関数</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>Smap.geocoder( geocoder )</td>
+      <td>String |<br>
+      Function |<br>
+      Geocoder</td>
+      <td rowspan="2">Geocorder&nbsp;&nbsp;</td>
+      <td rowspan="2">Geocoderオブジェクト生成します．<br>
+      引数に文字列を指定した場合は，S-mapに登録されているGeocoderの中からそれをIDとするものを探します．現在は'csis'のみが登録されており，この場合は東京大学空間情報科学研究センターの検索システムが利用できます．<br>
+      引数に関数を指定した場合は，それをgeocode()メソッドとするGeocoderオブジェクトを生成します．<br>
+      引数にオブジェクトを指定した場合は，Geocoderオブジェクトのリテラル表現と解釈して新たなGeocoderオブジェクトを生成します．<br>
+      引数に配列を指定した場合はGoecoderのリストと解釈して，各要素を引数として再度このファクトリー関数を呼び出し，生成されたGeocoderのリストを保持する新しいGeocoderオブジェクトを生成します．<br>
+      全ての引数を省略するか，nullを指定するとデフォルトのジオコーダ（Smap.DEFULT_GEOCODERで指定されたもの）となり，現在はCSIS利用となります．&nbsp;<br>
+      <font color="#ff0000">※CSISの地名検索は，シームレス地質図ラボサイトの非公式のサーバサービスを利用しています．<br>
+      引数ないし以外未実装</font></td>
+    </tr>
+    <tr>
+      <td>Smap.geocoder( geocoders )</td>
+      <td>[ Geocoder, ... ]</td>
+    </tr>
+  </tbody>
+</table>
+<h3>・プロパティ</h3>
+<table border="1" cellspacing="0" style="font-family: 'MS PGothic'; letter-spacing: normal; orphans: auto; text-indent: 0px; text-transform: none; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>id</td>
+      <td>String</td>
+      <td>なし</td>
+      <td>ジオコーダ名</td>
+    </tr>
+    <tr>
+      <td>geocoders</td>
+      <td>[ Geocoder, ...]&nbsp;</td>
+      <td>なし&nbsp;</td>
+      <td>ジオコーダのリスト</td>
+    </tr>
+  </tbody>
+</table>
+<h3>・メソッド</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>geocode( addr,<br>
+      　params )</td>
+      <td>String,<br>
+      　Object</td>
+      <td>Promise&nbsp;</td>
+      <td>addrで指定した地名を検索するプロミスを発行します．<br>
+      paramsには，検索時に使用するパラメータオブジェクトを指定します．パラメータオブジェクトではboundsプロパティが指定でき，南西および北東の緯度経度を指定して範囲を限定できます．<br>
+      プロミス成功時には，結果を格納するオブジェクトが引数として渡されます．</td>
+    </tr>
+    <tr>
+      <td>add( geocoder )</td>
+      <td>Geocoder</td>
+      <td>Geocoder&nbsp;</td>
+      <td>新しいGeocoderを追加します．<br>
+      引数にはGeocoderオブジェクトのリテラル表現を指定します．&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+<h3>・検索結果オブジェクト</h3>
+<p>　geocode()メソッドが返すプロミスで取得できる検索結果オブジェクトは，resultsフィールドを持ちます．このフィールドは以下のプロパティを持つオブジェクトの配列です．</p>
+<blockquote>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>title</td>
+      <td>String</td>
+      <td>住所，地名など</td>
+    </tr>
+    <tr>
+      <td>latLng</td>
+      <td>LatLng</td>
+      <td>位置</td>
+    </tr>
+  </tbody>
+</table>
+</blockquote>
+<h2><a name="promise" id="promise">Promise</a></h2>
+<p>　プロミス（Promise）オブジェクトは，非同期処理で有効な仕組みを提供するためのオブジェクトで，その時点ではまだ完了していない処理を表現します．ほかのライブラリではfuture,
+delayと呼ばれることもあります．<br>
+　S-mapでは，画像の読み込みや標高データの読み込みで利用され，しばしば戻り値としてプロミスオブジェクトが返されます．通常の利用では，このオブジェクトのthen()メソッドを使って，プロミス完了時（成功時や失敗時）の処理を登録するだけで利用できます．<br>
+　Smap.promise()を使て自作のプロミスを生成させることができます．この場合，プロミスオブジェクトのresolve()，reject()メソッドを使って，成功時や失敗時をプロミスに通知する必要があります．Smap.allPromise()関数を使て複数のプロミスがすべて終わった時点に動作するプロミスを生成することができます．</p>
+<h3>・ファクトリー関数</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>関数</th>
+      <th>引数</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>Smap.promise( starter )</td>
+      <td>Function</td>
+      <td>Promise</td>
+      <td>Promiseオブジェクト生成します．<br>
+      starterには，対象とする非同期処理を行う関数を記述します．<br>
+      starter関数は2つのコールバック関数を引数(resolve, reject)にとり，非同期処理に成功した場合はresolve, 失敗した場合はrejectを呼び出します．<br>
+      starterは省略でき，省略すると即座に成功となるプロミスを返します．</td>
+    </tr>
+  </tbody>
+</table>
+<h3>・メソッド</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>catch( onRejected )</td>
+      <td>Function</td>
+      <td>Promise</td>
+      <td>プロミス失敗時の処理を設定<br>
+      戻り値には，失敗の処理後に実行されるプロミスを返します．</td>
+    </tr>
+    <tr>
+      <td>reject()<br>
+      <font color="#ff0000">(廃止予定)</font></td>
+      <td>any</td>
+      <td>なし</td>
+      <td>プロミス失敗を通知<br>
+      引数はすべてそのままthen()メソッドのonRejectedで指定した失敗時の処理関数に渡されます．<br>
+      <font color="#ff0000">（環境により使用できないことがあります）</font></td>
+    </tr>
+    <tr>
+      <td>resolve()<br>
+      <font color="#ff0000">(廃止予定)</font></td>
+      <td>any</td>
+      <td>なし</td>
+      <td>プロミス成功を通知<br>
+      引数はすべてそのままthen()メソッドのonFulfiledで指定した成功時の処理関数に渡されます．<br>
+      <font color="#ff0000">（環境により使用できないことがあります）</font></td>
+    </tr>
+    <tr>
+      <td>then( onFulfilled,<br>
+      　onRejected )</td>
+      <td>Function,<br>
+      Function</td>
+      <td>Promise</td>
+      <td>プロミス完了時（成功または失敗時）の処理を設定<br>
+      成功するとonFulfiled，失敗するとonRejectedで指定した関数が実行されます．<br>
+      戻り値には，成功・失敗の処理後に実行されるプロミスを返します<br>
+      <font color="#ff0000">※2015-03-17現在バグがあり，ネイティブでPromiseが用意されていない環境(IEなど）では，onFulfilled処理内で発生したエラーが生成されるプロミスに反映されません</font></td>
+    </tr>
+  </tbody>
+</table>
+<h3>・関連関数</h3>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>関数</th>
+      <th>引数の型</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>Smap.promise.all( promise1, promise2, ... )</td>
+      <td>Promise, ...&nbsp;</td>
+      <td rowspan="4">&nbsp;Promise</td>
+      <td rowspan="4">&nbsp;すべての子プロミスが成功したときに成功となるプロミスを生成します<br>
+      子プロミスは可変引数として与えるか，配列として与えます．&nbsp;成功したとき結果は全てのプロミスから得られた値の配列として渡されます．失敗したとき、直ちに失敗したプロミスの結果をもって失敗が返されます．</td>
+    </tr>
+    <tr>
+      <td>Smap.promise.all( promiselist )</td>
+      <td>[ Promise, ...]</td>
+    </tr>
+    <tr>
+      <td>Smap.promiseAll( promise1, promise2, ... )<br>
+      <font color="#ff0000">(廃止予定)</font></td>
+      <td>Promise, ...</td>
+    </tr>
+    <tr>
+      <td>Smap.promiseAll( promiselist )<br>
+      <font color="#ff0000">(廃止予定)</font></td>
+      <td>[ Promise, ...]</td>
+    </tr>
+    <tr>
+      <td>Smap.promise.finishing( promise1, promise2, ... )</td>
+      <td>Promise, ..</td>
+      <td rowspan="4">&nbsp;Promise</td>
+      <td rowspan="4">&nbsp;すべての子プロミスの完了（成功または失敗）したときに成功となるプロミスを生成します．<br>
+      子プロミスは可変引数として与えるか，配列として与えます．<br>
+      結果は全てのプロミスから得られた値（失敗の場合はundefined）の配列として渡されます．</td>
+    </tr>
+    <tr>
+      <td>Smap.promise.finishing( promiselist. )</td>
+      <td>[ Promise, ...]&nbsp;</td>
+    </tr>
+    <tr>
+      <td>Smap.promiseFinishing( promise1, promise2, ... )<br>
+      <font color="#ff0000">(廃止予定)</font></td>
+      <td>Promise, ..</td>
+    </tr>
+    <tr>
+      <td>Smap.promiseFinishing( promiselist. )<br>
+      <font color="#ff0000">(廃止予定)</font></td>
+      <td>[ Promise,  ...]</td>
+    </tr>
+    <tr>
+      <td>Smap.promise.race( promiselist )</td>
+      <td>[ Promise, ...]</td>
+      <td>&nbsp;Promise</td>
+      <td>プロミスリストのうち，いずれかが最初に成功または失敗したときにその結果を返します．<br>
+      race()の返すプロミスが固定しても，プロミスリスト内のプロミスの実行は影響を受けません</td>
+    </tr>
+    <tr>
+      <td>Smap.promise.resolve( value )</td>
+      <td>Eney</td>
+      <td>Promise&nbsp;</td>
+      <td>即座に成功するプロミスを返します．valueにはプロミスに渡す値を指定します．valueにプロミスを指定した場合は，そのプロミスの結果が渡されます．</td>
+    </tr>
+    <tr>
+      <td>Smap.promise.reject( value )</td>
+      <td>Eney</td>
+      <td>Promise</td>
+      <td>即座に失敗するプロミスを返します．valueにはプロミスに渡す値を指定します．</td>
+    </tr>
+    <tr>
+      <td>Smap.allPromise( promise1, promise2, ... )<br>
+      <font color="#ff0000">(廃止予定)</font></td>
+      <td>Promise, ,..</td>
+      <td rowspan="2">Promise</td>
+      <td rowspan="2">すべての子プロミスの終了を監視するプロミスを生成<br>
+      子プロミスは可変引数として与えるか，配列として与えます．<br>
+      <font color="#ff0000">※名称がES6の「Promise.all()」と紛らわしいため，ver 0.1.1ではpromiseFinishing()に変更しました</font></td>
+    </tr>
+    <tr>
+      <td>Smap.allPromise( promiselist )&nbsp;<br>
+      <font color="#ff0000">(廃止予定)</font></td>
+      <td>[ Promise, ...]</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<p align="center">2016年10月28日更新</p>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transnewitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta name="GENERATOR" content="JustSystems Homepage Builder Version 16.0.10.0 for Windows">
+<link href="common.css" rel="stylesheet" type="text/css">
+  <title>S-map － クイックスタート</title>
+</head>
+<body>
+
+<div id="header">
+<table align="center">
+<tr>
+<td><a href="index.html">　Home　</a></td>
+<td><a href="quickstart.html">クイックスタート</a></td>
+<td><a href="api.html">　API　</a></td>
+<td class="select">　解説　</td>
+<td><a href="extension.html">拡張ガイド</a></td>
+<td><a href="update.html">更新履歴</a></td>
+<tr/>
+</table>
+</div>
+
+<h1>S-map － 解説</h1>
+<h2><a name="promise" id="promise">プロミス</a></h2>
+<p>　プロミスは，生成時点ではまだ完了していない処理を表現するオブジェクトで，非同期処理を簡潔に記述するために役立ちます．JavaScriptの次期バージョン(ES6)で導入される予定で，ChormeやFirefoxではすでに実装されています．S-mapでは，ブラウザがプロミスを実装している場合はそれを使用し，実装されてない場合は独自実装したものを使用します．</p>
+<h3>then()メソッドの戻り値</h3>
+<p>　プロミスのthen()メソッドは新たにプロミスを生成して返します．このプロミスは，最初のプロミスが成功または失敗したときに実行されるプロミスです．最初のプロミスのコールバック関数で値を返すと，then()が返すプロミスで受け取ることができます．このことを利用してプロミスのメソッドチェーンを作ることができます．<br>
+　以下は，最後にコンソールにメッセージを記述する例です．</p>
+<pre>        Smap.loadText( jsonsrc ).then( 
+                function( text ) { // 成功時の処理
+                        document.getElementById( 'out1' ).innerHTML = '結果: ' + text.slice( 0, 40 );
+                },
+                function( error ) { // 失敗時の処理
+                        document.getElementById( 'out1' ).innerHTML = error.msg;
+                }
+        ).then( function() {
+                // thenメソッドはさらに新しいプロミスを返すのでメソッドチェーンでつなげられます．
+                document.getElementById( 'out2' ).innerHTML = 'テキストファイル読み込み完了';
+        } );</pre>
+<blockquote style="color: rgb(0, 0, 0); font-family: 'MS PGothic'; font-size: medium; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;">(サンプルファイル)　<a href="../sample/common/545_loadText.html">テキストファイルの読み込み</a></blockquote>
+<h3>独自プロミス</h3>
+<p>　プロミスオブジェクトは独自に生成することも可能です．S-mapでプロミスを生成するには Smap.promise() 関数を使用します（ES6では，Promiseコンストラクタを使用します）．Smap.promise()関数は引数に関数を1つだけ取り，この関数は2つの引数resolveとrejectをとり，この中で非同期処理を含む部分の処理を記述します．そして成功した場合はresolveで指定した関数を，失敗した場合はrejectで指定した関数をコールします．<br>
+　Smap.loadImageの内容を記述すると以下のようになります．</p>
+<pre>        promise = Smap.promise( function( resolve, reject ) {
+                var
+                        img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = function() {
+                        resolve( this );                        // 成功時にはresolve()をコール
+                };
+                img.onerror = function() {
+                        reject( this );                         // 失敗時にはreject()をコール
+                }
+                img.src = imgsrc;
+        } );</pre>
+<blockquote style="color: rgb(0, 0, 0); font-family: 'MS PGothic'; font-size: medium; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;">(サンプルファイル)　<a href="../sample/common/550_loadImage.html">画像ファイルの読み込み</a></blockquote>
+<h3>複数のプロミスの完了を待つプロミス</h3>
+<p>　S-mapでは，複数のプロミスの完了を待つプロミスを生成するSmap.promiseFinishing()関数が利用できます．この関数は引数にプロミスを並べるか，プロミス配列を指定すると，全てのプロミスが完了（成功または失敗）したときに実行される新しいプロミスを返します．新しいプロミスの戻り値には各プロミスの結果が配列で渡されます（失敗した場合はundefinedとなります）．</p>
+<pre>        // promiseFinishingの利用: すべてが完了したら成功するプロミス
+        Smap.promiseFinishing( promise1, promise2 ).then( function( data ) {
+                ctx.drawImage( data[0], 0, 0 );
+                ctx.globalAlpha = 0.7;
+                ctx.drawImage( data[1], 0, 0 );
+        } );    </pre>
+<blockquote style="color: rgb(0, 0, 0); font-family: 'MS PGothic'; font-size: medium; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;">(サンプルファイル)　<a href="../sample/common/550_loadImage.html">画像ファイルの読み込み</a></blockquote>
+<p>　Smap.promiseFinishing()は，ES6にはない独自仕様です．ES6では似た関数でall()が定義されていますが，all()は一つでも失敗するとプロミスが失敗となり，データを受け取ることもできません．</p>
+<h3>ループ内のプロミスに値を渡す方法</h3>
+<p>　forループ内でプロミスのthen()メソッドを利用する場合は注意が必要です．then()メソッドで指定した関数は非同期で呼ばれるため，そのままではforループの終了後(カウンターが最大の時）に実行されるます．このような場合，forループ内に即時関数を作るとその中で定義した変数はそのままthen()メソッドで設定した関数内でも使用できるようになります．<br>
+　通常は，以下のように渡したい変数を即時関数の引数として渡すと処理が簡潔になります．</p>
+<pre class="source">        var
+                pList = [],
+                url1 = 'https://gbank.gsj.jp/seamless/tilemap/basic/glfn/10/402/907.png',
+                url2 = 'https://gbank.gsj.jp/seamless/tilemap/basic/glfn/10/402/908.png';
+
+        pList.push( Smap.loadImagePixel( url1, 10, 10 ) );
+        pList.push( Smap.loadImagePixel( url2, 10, 10 ) );
+
+        for( var i = 0; i &lt; pList.length; i ++ ) {
+                ( function( i ) {
+                        var
+                                out = document.getElementById( 'out' + ( i + 1 ) );
+                        pList[i].then( function( data ) {
+                                out.innerHTML = 'no:' + i + ' data:' + data;
+                        } );
+                } )( i );
+        };
+</pre>
+<blockquote style="color: rgb(0, 0, 0); font-family: 'MS PGothic'; font-size: medium; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;">(サンプルファイル)　<a href="../sample/common/555_promiseParams.html">ループ内のプロミスパラメータを渡す</a></blockquote>
+<hr>
+<p align="center">2015年6月15日更新</p>
+</body>
+</html>

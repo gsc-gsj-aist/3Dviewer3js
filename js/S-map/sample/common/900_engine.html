@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<!-- 900_engine.html, S-mapサンプル - 地図描画エンジン作成
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - 地図描画エンジン作成</title>
+	<style>
+#map {
+	width: 800px;
+	height: 600px;
+}
+	</style>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h2> 地図描画エンジン作成</h2>
+	<div>Leaflet.jsを使った地図描画エンジンを自作します</div>
+	<div id="map" />
+	<script>
+
+'use strict';
+
+( function() {
+
+	// Smap.engine.エンジン名に，Mapを生成する関数を設定します
+	Smap.engine.myleaflet = function( map ) {
+
+		// Mapオブジェクトに対応する描画エンジン依存のオブジェクトを生成し，
+		// Map.originalにセットします．
+		map.original = new L.Map( map.owner, {
+			center: map.center,
+			zoom: map.zoom
+		} );
+
+		// Mapでは，最低限_tileLayerというメソッドを用意しなければなりません．
+		// このメソッドは描画エンジン依存のタイルレイヤーを生成し，
+		// Layer.originalにセットして地図上に描画されるようにします．
+		map._tileLayer = function( aLayer ) {
+
+			aLayer.original = new L.TileLayer( aLayer.url );
+
+			for ( var key in aLayer ) {
+				if ( aLayer.url.indexOf( '{' + key + '}' ) >= 0 ) {
+					aLayer.original.options[ key ] = aLayer[ key ]; 
+				}
+			};
+
+			aLayer.original.addTo( map.original );
+		}
+
+		return map;
+	};
+
+} )();
+
+( function() {
+
+	Smap.map( { owner: 'map', engine: 'myleaflet' } );
+
+} )();
+
+	</script>
+</body>
+</html>

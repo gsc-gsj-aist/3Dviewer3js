@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<!-- leaflet120_simple.html, S-mapサンプル - キャンバスに非同期に描画するタイル
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - キャンバスに非同期に描画するタイル</title>
+	<style>
+body { margin:0px; }
+#header {
+  position: absolute;
+  top:0px; left: 0px; right: 0px;
+  height: 80px;
+}
+#map {
+  position: absolute;
+  top:80px; bottom: 0px; left: 0px; right: 0px;
+}
+h1 {
+	font-size: 16pt;
+}
+	</style>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<div id="header">
+		<h1>S-mapサンプル - キャンバスに非同期に描画するタイル</h1>
+		<input id="save" type="button" value="ファイルに保存" />
+	</div>
+	<div id="map"></div>
+	<script>
+
+'use strict';
+
+//// アプリケーション本体
+( function() {
+
+	var
+		map,
+		height = 20;
+
+	var map = Smap.map( {
+		owner: 'map',
+    	center: { lat: 35.3, lng: 137.409 },
+    	minZoom: 5,
+    	maxZoom: 13,
+      	zoom: 10,
+      	overlays: [ {
+			title: '浸水タイル',
+			url: 'http://gsj-seamless.jp/labs/elev/m/{z}/{y}/{x}.png?errorpng=on',
+	    	minZoom: 5,
+	    	maxZoom: 13,
+			drawTile: function( canvas, coord ) {
+		        var
+		        	p,
+		        	ctx =canvas.getContext( '2d' );
+
+//				var p = Smap.loadImage( this.getTileUrl( coord ) );
+//				p.then( function( img ){
+				p = Smap.loadImage( this.getTileUrl( coord ) ).then( function( img ){
+					var
+						data;
+
+					if ( img.width > 1 ) {
+						ctx.drawImage( img, 0, 0 );
+				    	data = ctx.getImageData( 0, 0, canvas.width, canvas.height );
+
+					    for ( var i = 0; i < data.data.length; i += 4 ){
+					    	var
+					      		r = data.data[i],
+					      		g = data.data[i+1],
+					      		b = data.data[i+2];
+						    if ( g * 256 + b < height  ){
+						    	data.data.set( [ 0, 0, 255, 255 ], i );
+						    } else {
+						    	data.data.set( [ 0, 0, 0, 0 ], i );
+						    }
+					    }  
+					    ctx.clearRect( 0, 0, canvas.width, canvas.height );  
+					    ctx.putImageData( data, 0, 0 );  
+					}
+				} );
+				// drawTile()が非同期処理を含む場合は，描画の完了を伝えるためのプロミスを返す必要があります．
+				return p;	
+			}
+      	} ],
+	} );
+
+	document.querySelector( '#save' ).addEventListener( 'click', function() {
+		map.cutImage( 0, 0, 'test.png' );
+//		map.findOverlay( '浸水タイル' ).cutImage( 0, 0, 'test.png' );
+	} );
+} ) ();
+
+	</script>
+</body>
+</html>

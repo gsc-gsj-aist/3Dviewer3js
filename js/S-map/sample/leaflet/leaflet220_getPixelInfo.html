@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<!-- leaflet020_simple.html, S-mapサンプル - マウス位置のピクセル情報取得
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - マウス位置のピクセル情報取得</title>
+	<style>
+body { margin:0px; }
+#map {
+	position: absolute;
+	top:105px; bottom: 0px; left: 0px; right: 0px;
+}
+h1 { font-size: 16pt; padding: 4px; margin: 0px; }
+div { padding: 4px; }
+	</style>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>S-mapサンプル - マウス位置のピクセル情報取得</h1>
+	<div id="out"></div>
+	<div id="center"></div>
+	<div id="map"></div>
+	<script>
+
+'use strict';
+
+( function() {
+
+	var
+		map,
+		tileLayer,
+		imageLayer,
+		legendFile = 'http://gsj-seamless.jp/seamless/legend/detailed.json';
+
+	map = Smap.map( {
+		owner: 'map',
+		center: { lat: 36, lng: 140 },
+		zoom: 10,
+		minZoom: 5,
+		maxZoom: 13
+	} );
+
+	tileLayer =	map.addOverlay( {
+	    url: 'https://gbank.gsj.jp/seamless/tilemap/detailed/g/{z}/{y}/{x}.png',
+    	title: 'シームレス地質図',
+	    attribution: 'AIST GSJ',
+    	attribution_url: 'https://gbank.gsj.jp/seamless/',
+	    minZoom: 5,
+	    maxZoom: 13,
+    	opacity: 0.7,
+	} );
+
+	imageLayer = map.addOverlay( {
+	    url: '../img/5440d.png',
+	    bounds: [ [ 36, 140 ], [ 36.666667, 141 ] ],
+	} );
+
+	//json凡例データの取得
+	Smap.loadJSON( legendFile ).then( function( data ){
+		tileLayer.setLegend( data.units );
+		//以下の表現も可能
+		imageLayer.set( 'legend', data.units );
+	});
+
+	map.on( 'click', function( event ) {
+		getLegend( imageLayer, event.latLng ).then( function( legend ) {
+			map.addPopup( event.latLng, '[image layer] ' + legend );
+		} );
+	} );
+
+	map.on( 'mousemove', function( event ) {
+		getLegend( tileLayer, event.latLng ).then( function( legend ) {
+			document.getElementById( 'out' ).innerHTML = '[tile layer] ' + legend;
+		} );
+	} );
+
+	map.on( 'move', function( event ) {
+		var
+			c = map.setCenter(),
+			s = 'Center: ' + c.lat.toFixed( 4 ) + ', ' + c.lng.toFixed( 4 );
+		document.getElementById( 'center' ).innerHTML = s;
+	} );
+
+	function getLegend( layer, latLng ) {
+		var
+			result;
+
+		result = layer.getPixelInfo( latLng, map.setZoom() ).then( function( info ) {
+			var
+				s;
+
+			s = 'Lat: ' + latLng.lat.toFixed( 4 )  + ', Lng: ' + latLng.lng.toFixed( 4 )+ '<br />';
+			if( info ) {
+				s += 'ID: ' + info.ID + ' ';
+				s += ', Title: ' + info.title;
+				s += ', Smapolor: ' + info.fill;
+			}
+			return s;
+		} );
+		return result;
+	};
+
+} )();
+
+	</script>
+</body>
+</html>

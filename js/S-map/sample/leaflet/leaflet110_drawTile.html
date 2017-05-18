@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<!-- leaflet110_simple.html, S-mapサンプル - キャンバスに描画するタイル
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - 描画するタイル</title>
+	<style>
+body { margin:0px; }
+#map {
+  position: absolute;
+  top:0px; bottom: 0px; left: 0px; right: 0px;
+}
+	</style>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<div id="map"></div>
+	<script>
+
+'use strict';
+
+//// アプリケーション本体
+( function() {
+
+	Smap.map( {
+		owner: 'map',
+    	center: { lat: 34.637, lng: 137.409 },
+    	minZoom: 5,
+    	maxZoom: 15,
+      	zoom: 10,
+      	overlays: [ {
+			title: 'タイル座標',
+	    	minZoom: 5,
+	    	maxZoom: 15,
+			drawTile: function( canvas, coord ) {
+		        var
+		        	ctx =canvas.getContext( '2d' );
+		        ctx.strokeStyle = 'rgb(0, 0, 256)';
+		        ctx.fillStyle = 'rgb(0, 0, 256)';
+		        ctx.font = '32px "Arial"';
+		        ctx.strokeRect( 0, 0, 256, 256 );
+		        ctx.fillText( 'z = ' + coord.z, 10, 30);
+		        ctx.fillText( 'x = ' + coord.x, 10, 60);
+		        ctx.fillText( 'y = ' + coord.y, 10, 90);
+			}
+      	} ],
+	} );
+
+} ) ();
+
+	</script>
+</body>
+</html>

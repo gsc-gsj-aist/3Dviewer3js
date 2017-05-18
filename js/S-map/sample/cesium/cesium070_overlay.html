@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<!-- cesium070_overaly.html, S-mapサンプル - オーバーレイレイヤー
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - オーバーレイレイヤー</title>
+	<style>
+body { margin:0px; }
+#map {
+  position: absolute;
+  top:0px; bottom: 0px; left: 0px; right: 0px;
+}
+#side {
+  position: absolute;
+  top: 10px; bottom: 50px; left: 10px; width: 200px;
+  background: white;
+  padding: 5px;
+}
+	</style>
+	<link rel="stylesheet" href="http://cesiumjs.org/releases/1.24/Widgets/widgets.css"/>
+	<script src="http://cesiumjs.org/releases/1.24/Cesium.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<div id="map"></div>
+	<div id="side">
+		<div>不透明度</div>
+		<input id="20" type="radio" value="0.2" name="opacity">20</input><br />
+		<input id="40" type="radio" value="0.4" name="opacity">40</input><br />
+		<input id="60" type="radio" value="0.6" name="opacity">60</input><br />
+		<input id="80" type="radio" value="0.8" name="opacity" checked="checked">80</input><br />
+		<input id="100" type="radio" value="1.0" name="opacity">100</input><br />
+		<input id="line" type="checkbox" checked="checked">断層・地質境界</input><br />
+		<input id="num" type="checkbox" checked="checked">凡例番号</input><br />
+		<input id="bouguer" type="checkbox" checked="checked">重力図（ブーゲー異常）</input><br />
+		<input id="delOverlay" type="button" value="重力図削除"></input>
+	</div>
+	<script>
+
+'use stric';
+
+//// アプリケーション本体
+( function() {
+
+	var
+    	map = Smap.map( {
+			engine: 'cesium',
+    		owner: 'map',
+			overlays: [ {
+		    	url: 'https://gbank.gsj.jp/seamless/tilemap/{type}/{layer}/{z}/{y}/{x}.png',
+//		    	url: 'http://gsj-seamless.jp/seamless/tilemap/{type}/{layer}/{z}/{y}/{x}.png',
+	    		title: 'シームレス地質図(詳細版)',
+		    	attribution: 'AIST GSJ',
+	    		attribution_url: 'https://gbank.gsj.jp/seamless/',
+		    	minZoom: 5,
+		    	maxZoom: 13,
+	    		opacity: 0.8,
+	    		bounds: { sw: { lat:20.4, lng: 122.78 }, ne: { lat: 45.58, lng: 154.78 } },
+	    		type: 'detailed',
+//		    	layer: 'gn'
+		    	layer: 'glfn'
+			} ],
+	    	center: { lat: 34.637, lng: 137.409 },
+	    	minZoom: 5,
+	    	maxZoom: 13,
+	      	zoom: 10
+	    } ),
+		bouguer = map.addOverlay( {
+//		    url: 'https://gbank.gsj.jp/tilemap/wmts/1.0.0/{type}/default/EPSG900913/{z}/{y}/{x}.png',
+		    url: 'https://gbank.gsj.jp/tilemap/gravdb/wmts/1.0.0/{type}/default/EPSG900913/{z}/{y}/{x}.png',
+		    title: '重力図（ブーゲー異常）（仮定密度2.00 g/cm3）',
+		    attribution: 'AIST GSJ',
+		    attribution_url: 'https://gbank.gsj.jp/',
+		    maxZoom: 18,
+		    minZoom: 0,
+		    opacity: 0.8,
+		    type: 'BouguerAnomaly200',
+		} ),
+		layer;
+
+	layer = map.findOverlay( 'シームレス地質図(詳細版)' );
+
+	// 不透明度の変更
+	document.getElementById( '20' ).addEventListener( 'click', opacityCheck );
+	document.getElementById( '40' ).addEventListener( 'click', opacityCheck );
+	document.getElementById( '60' ).addEventListener( 'click', opacityCheck );
+	document.getElementById( '80' ).addEventListener( 'click', opacityCheck );
+	document.getElementById( '100' ).addEventListener( 'click', opacityCheck );
+	function opacityCheck( event ) {
+		var
+			opacity = event.target.getAttribute( 'value' );
+		console.log( layer.setOpacity( opacity ) );
+//	  console.log( layer.set( 'opacity', opacity ) );
+	}
+
+	// urlテンプレート内パラメータの変更
+	document.getElementById( 'line' ).addEventListener( 'click', layerCheck );
+	document.getElementById( 'num' ).addEventListener( 'click', layerCheck );
+
+	function layerCheck() {
+		var
+			select = 'g';
+		if ( document.getElementById( 'line' ).checked ) {
+			select += 'lf';
+		}
+		if ( document.getElementById( 'num' ).checked ) {
+			select += 'n';
+		}
+		layer.set( 'layer', select );
+//		layer.set( { layer: select } );
+	};
+
+	// レイヤーの表示・非表示切り替え
+	document.getElementById( 'bouguer' ).addEventListener( 'click', function( event ) {
+		console.log( bouguer.setVisibility( this.checked ) );
+//		bouguer.set( 'visibility', this.checked )
+	} );
+
+	// レイヤーの削除
+	document.getElementById( 'delOverlay' ).addEventListener( 'click', function( event ) {
+		map.remove( bouguer );
+// 		以下の表現も可能
+//		map.removeOverlay( bouguer );
+		console.log( map.findOverlay() );
+	} );
+
+	// レイヤーのピクセル情報の取得
+	map.on( 'click', function( event ) {
+	    layer.getPixel( event.latLng, 8 ).then( function( data ) {
+	    	var
+	    		s = 'RGB: ' + data[0] + ',' + data[1] + ',' + data[2];
+	    	map.addPopup( event.latLng, s );
+	    } );
+	} );
+
+//	layer.set( 'type', 'basic' );
+
+} ) ();
+
+	</script>
+</body>
+</html>
