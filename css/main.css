@@ -1,0 +1,170 @@
+@charset "UTF-8";
+
+/* コンテンツ領域 */
+#wrapper{
+		margin					: 0;
+		padding					: 0;
+		border					: 0;
+		position				: relative;
+		background-color		: #000;
+}
+
+/* 設定画面内のタイトル */
+h2	{
+		margin					: 0;
+		/*
+		padding					: 10px 0 10px 5px;
+		*/
+		padding					: 10px 0 10px 33px;
+		text-indent				: -28px;
+		
+		font-size				: 116%;
+		background-color		: rgb(26,19,17);
+	}
+/* 設定画面内の小見出し */
+h3	{
+		margin					: 0;
+		padding					: 10px 0;
+		font-size				: 100%;
+	}
+
+/**************************************************************/
+/*
+	ナビゲーションボタン
+*/
+/**************************************************************/
+/* リセット */
+nav,
+nav ul,
+nav ul li.operation,
+nav ul li.operation ol,
+nav ul li.operation ol li	{
+		margin					: 0;
+		padding					: 0;
+	}
+/* navの位置はbodyに対して位置絶対指定 */
+nav	{
+		position				: absolute;
+		top						: 20px;
+		left					: 0;
+		z-index					: 20;
+	}
+/* 個々の要素の指定（操作ボタン） */
+nav ul li.operation	{
+		list-style				: none;
+		height					: 50px;
+	}
+/* ブラウザが横長の時は操作ボタンを横に並べる */
+@media (orientation: portrait) {
+		nav ul li.operation	{
+				float			: left;
+			}
+	}
+
+/**************************************************************/
+/* ナビゲーションボタンオンマウス時のツールチップ */
+/**************************************************************/
+div.tooltip	{
+		position				: absolute;
+		border-width			: 1px 1px 1px 0;
+		border-style			: solid;
+		border-color			: #000;
+		font-size				: 14px;
+		
+		z-index:12;
+	}
+
+/**************************************************************/
+/*
+	ナビゲーションパネル
+*/
+/**************************************************************/
+
+/**************************************************************/
+/* パネル内のformとブロック要素 */
+/**************************************************************/
+/* 設定画面（form）は位置絶対指定でデフォルトは画面外 */
+nav ul li.operation form.submenu	{
+		position				: absolute;
+		top						: 0;
+		left					: -280px;
+		width					: 277px;
+		border-right			: 3px ridge #000;
+		background-color		: #555;
+		z-index					: 1024;
+		display					: none;
+		
+		border-top				: 1px solid #777;
+		color					: #fff;
+		font-size				: 14px;
+	}
+/* 設定画面内のdiv要素に関する定義 */
+nav ul li.operation form.submenu div.block	{
+		border-top				: 1px solid #777;
+		padding					: 5px 10px;
+	}
+/* 各フォーム要素のdiv */
+nav ul li.operation form.submenu div.block div	{
+		margin-left				: 30px;
+	}
+/* input.rangeの幅 */
+nav ul li.operation form.submenu div.block div input.range	{
+		max-width				: 150px;
+	}
+
+/**************************************************************/
+/* 閉じるボタン */
+/**************************************************************/
+/* 設定画面タイトル右の閉じるボタン */
+nav ul li.operation form.submenu div img.closeSubmenu	{
+		float					: right;
+		padding					: 5px;
+		cursor					: pointer;
+	}
+
+/**************************************************************/
+/*
+	著作権表示
+*/
+/**************************************************************/
+#copyrights	{
+		position					: absolute;
+		left						: 10px;
+		bottom						: 10px;
+		z-index						: 30;
+		
+		font-size					: 11px;
+		padding						: 3px 5px;
+		color						: #000;
+		background-color			: rgba(255, 255, 255, 0.7);
+		
+		border-top-left-radius		: 3px;
+		border-top-right-radius		: 3px;
+		border-bottom-left-radius	: 3px;
+		border-bottom-right-radius	: 3px;
+	}
+#copyrights ul	{
+		list-style					: none;
+		margin						: 0;
+		padding						: 0 0 0 5px;
+	}
+#copyrights ul li	{
+		display						: inline;
+		margin						: 0;
+		padding						: 0 5px 0 0;
+	}
+
+/**************************************************************/
+/*
+	Safariでスクロールバーを表示させるためのハック
+*/
+/**************************************************************/
+::-webkit-scrollbar {
+	    -webkit-appearance		: none;
+	    width					: 7px;
+	}
+::-webkit-scrollbar-thumb {
+	    border-radius			: 4px;
+	    background-color		: rgba(0,0,0,.5);
+	    box-shadow				: 0 0 1px rgba(255,255,255,0.5);
+	}

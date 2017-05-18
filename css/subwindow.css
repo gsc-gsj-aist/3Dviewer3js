@@ -1,0 +1,45 @@
+@charset "UTF-8";
+
+/* 地図右下の小窓 */
+#subWindow	{
+		position					: absolute;
+		z-index						: 10;
+		right						: 10px;
+		bottom						: 10px;
+		
+		display						: none;
+	}
+#subWindow div.smallWindow	{
+		position					: relative;
+	}
+	
+/* 小窓を閉じるボタンの位置絶対指定 */
+#subWindow div.smallWindow img.closeSmallWindow	{
+		position					: absolute;
+		top							: -1px;
+		left						: -1px;
+		cursor						: pointer;
+	}
+	
+/* 小窓内のコンテンツ領域に関する定義（枠線部分） */
+#subWindow div.smallWindow div.contentArea	{
+		width						: 210px;
+		height						: 210px;
+		border						: 2px solid #777;
+		padding						: 10px;
+		text-align					: left;
+		background-color			: #fff;
+		
+		border						: 1px solid #000;
+		border-top-left-radius		: 10px;
+		border-top-right-radius		: 10px;
+		border-bottom-left-radius	: 10px;
+		border-bottom-right-radius	: 10px;
+	}
+
+/* 小窓内のiframeに関する定義 */
+#subWindow div.smallWindow div.contentArea iframe	{
+		width						: 210px;
+		height						: 210px;
+		border						: 1px solid #777;;
+	}
