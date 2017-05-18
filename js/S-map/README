@@ -1,0 +1,33 @@
+S-map by 西岡 芳晴 ( NISHIOKA Yoshiharu )
+
+---------
+Overview
+---------
+
+S-mapは，2015年5月に公開された20万分の1日本シームレス地質図新ビューアのために作成されたJavaScript地図描画ライブラリです．
+S-mapは，それ自体は地図描画を行う機能は持たず，Leaflet, Cesium等の地図描画ライブラリを呼び出して使用するための地図描画プラットフォームを提供します．このプラットフォームには，独自の地図描画エンジンを作成して組み込むことも可能です．
+詳細は以下を参照してください
+
+https://gsj-seamless.jp/labs/smap/doc/
+
+---------
+License
+---------
+
+本プログラムの著作権は、産業技術総合研究所 地質調査総合センターが保有しています。
+本プログラムはApache License 2.0 に基づいてライセンスされます。
+
+Copyright 2015-2016 Geological Survey of Japan (GSJ),
+National Institute of Advanced Industrial Science and Technology (AIST)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

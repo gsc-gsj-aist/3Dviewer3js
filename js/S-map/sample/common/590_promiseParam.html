@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<!-- 590_promiseParam.html, S-mapサンプル - ループ内のプロミスパラメータを渡す
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - ループ内のプロミスパラメータを渡す</title>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>S-mapサンプル - ループ内のプロミスパラメータを渡す</h1>
+
+	<h3>テキストファイル読み込み</h3>
+	<div id="out1"></div>
+	<div id="out2"></div>
+
+	<script>
+
+'use strict';
+
+( function() {
+
+	var
+		pList = [],
+		url1 = 'https://gbank.gsj.jp/seamless/tilemap/basic/glfn/10/402/907.png',
+		url2 = 'https://gbank.gsj.jp/seamless/tilemap/basic/glfn/10/402/908.png';
+
+	pList.push( Smap.loadImagePixel( url1, 0, 0 ) );
+	pList.push( Smap.loadImagePixel( url2, 0, 0 ) );
+
+	for( var i = 0; i < pList.length; i ++ ) {
+		( function( i ) {
+			var
+				out = document.getElementById( 'out' + ( i + 1 ) );
+			pList[i].then( function( data ) {
+				out.innerHTML = 'no:' + i + ' data:' + data;
+			} );
+		} )( i );
+	};
+
+} )();
+
+	</script>
+</body>
+</html>

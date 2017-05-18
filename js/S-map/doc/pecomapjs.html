@@ -1,0 +1,359 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transnewitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta name="GENERATOR" content="JustSystems Homepage Builder Version 16.0.1.0 for Windows">
+<link href="common.css" rel="stylesheet" type="text/css">
+  <title>pecomap.js - 解説</title>
+</head>
+<body>
+  <h1>pecomap.js - 解説</h1>
+<p>　pecomap.jsは，ペコマッププロジェクトで開発している2D/3D地図を描画できる軽量JavaScriptライブラリです．現状ではLeafletという地図JavaScriptライブラリのラッパーで3D描画はできませんが，今後2D/3D描画機能を独自実装する予定です．<br>
+　Leafletは，軽量で高速動作可能な2D地図ライブラリです．機能は絞られていますが，必要なところは網羅されていてます．pecomap.jsは，当初独自描画の予定で開発されていましたが，Leafletの機能がプロジェクトのコンセプトに非常によく適合したため，方針を転換しまずは薄いラッパーAPIとして実装しました．その結果本ライブラリは，地図描画エンジンを切り替える機能を有することになりました．このため，実戦的にはLeafletと独自実装の3D部分を切り替えて使うといった使い方も可能になるでしょう．　</p>
+<h4>・ライブラリ本体</h4>
+<blockquote>→　<a href="lib/pecomap.js">pecomap.js</a></blockquote>
+<h4>・APIリファレンス</h4>
+<blockquote>→　<a href="api.html">APIリファレンス</a></blockquote>
+<h3>基本コンセプト</h3>
+<ul style="color: rgb(0, 0, 0); font-family: 'MS PGothic'; font-size: medium; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;">
+  <li>将来，3D用地図ライブラリを自作したときに，それとLeafletをシームレスに利用できるようなツールにする</li>
+  <li>Engineという概念クラスを導入し，地図描画部はその派生クラスに行わせる</li>
+  <li>APIの基本は，Leafletを参考にする</li>
+</ul>
+<h3>データフォーマット</h3>
+<p>　地図上に表示するデータフォーマットしては以下を扱います．</p>
+<ul>
+  <li>PNG, GIF, JPEG
+  <li>SVG
+  <li>KML, GeoJSON
+</ul>
+<blockquote><font color="#ff0000">※SVG, KML GeoJSONについては2014年2月24日現在未実装です．</font></blockquote>
+<p>　逆に以下のデータフォーマットは扱わない予定です．</p>
+<ul>
+  <li>BMP, TIFF
+  <li>SHAPE, DLG, E00
+</ul>
+<p>　また地図サービスとしてはタイルマップサービス（WMTS等）を主に扱い，WMS, WFS, WPSには対応しない予定です．</p>
+<h2>準備</h2>
+<p>　pecomap.jsは単一のファイルからなります．以下のURLを直接呼び出して使うか，ダウンロードして適当なフォルダに配置して呼び出してください．</p>
+<blockquote>http://gsj-seamless.jp/pecomap/lib/pecomap.js<br>
+<font color="#ff0000">(このサーバはテスト用です．正式版は別のサーバに移動する予定です)</font></blockquote>
+<p>　また，pecomap.jsを利用するにはマップエンジンとして<a href="http://leafletjs.com/">Leaflet(http://leafletjs.com/)</a>を必要とします．Leafletもまた直接呼び出すか，ダウンロードして利用できるようにしてください．LeafletはCSSも必要としているので，例えばすべてサーバ上のものを使う最小限のアプリケーションを作成すると，以下のようになります．</p>
+<p class="sample">サンプル ( <a href="sample/0_minimum.html">0_minimum.html</a> )　pecomap.js最小アプリケーション</p>
+<pre class="source">&lt;!DOCTYPE html&gt;
+&lt;html style=&quot;height: 100%&quot;&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;http://leafletjs.com/dist/leafmlet.css&quot;&gt;
+&lt;script src=&quot;http://leafletjs.com/dist/leaflet.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;http://gsj-seamless.jp/pecomap/lib/pecomap.js&quot;&gt;&lt;/script&gt;
+&lt;body style=&quot;height: 100%&quot; onload=&quot;PECO.map()&quot; /&gt;
+&lt;/html&gt;</pre>
+<h2>Map</h2>
+<h3>Mapオブジェクトの生成</h3>
+<p>　pecomap.jsで地図を描くには，PECO.map()関数を使用します．pecomap.jsでは，なるべくデフォルトで操作できるようになっているので，map()関数も引数無しで，次の1行で地図が描けます．</p>
+<pre class="source">PECO.map();</pre>
+<p>　PECO.map()関数はMapオブジェクトを生成して返しますが，地図を描くだけなら使用する必要はありません．「Mapオブジェクトを生成する」というよりは，map()関数で「地図を表示させる」という感覚です．<br>
+　引数に何も指定しない場合，&lt;body&gt;要素全体を使ってズームレベル０，中心緯度0度，経度0度で，地理院地図の標準タイルとLeafletを使って世界地図を描きます．ただし，body要素に適当なスタイルが設定されていないと結局は地図が描かれませんので注意してください．</p>
+<h4 class="source">サンプル ( <a href="sample/1_simple.html">1_simple.html</a> )　 シンプル</h4>
+<pre class="source">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot; /&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;initial-scale=1, user-scalable=no&quot; /&gt;
+  &lt;title&gt;pecomap.js サンプル - シンプル&lt;/title&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;leaflet-0.7.2/leaflet.css&quot; /&gt;
+  &lt;style&gt;
+html, body { width: 100%; height: 100% }
+  &lt;/style&gt;
+  &lt;script src=&quot;leaflet-0.7.2/leaflet.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;../lib/pecomap.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;script&gt;
+
+'use strict';
+PECO.map();
+
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+<h3>地図描画要素の指定</h3>
+<p>　もちろん地図を描画する先のHMTLオブジェクトを&lt;body&gt;要素以外に指定することができます．　地図を描く要素を指定する方法には2通りあります．一つはPECO.Map()のコンストラクタの引数に文字列として，描画先HTML要素のid属性値を指定します．描画先要素の指定は最も大事な機能なので直接指定できるようになっています．2つ目はMap()コンストラクタの引数としてオブジェクトを渡し，そのプロパティで指定する方法です．オブジェクトが渡されると初期化用パラメータオブジェクトとみなされ，このオブジェクトのownerプロパティにid属性または直接HTML要素を設定するとことによっても，描画先要素を指定できます．</p>
+<h4 class="source">サンプル ( <a href="sample/2_div.html">2_div.html</a> )　div要素指定</h4>
+<pre class="source">PECO.map( 'map1' );
+PECO.map( { owner: document.querySelector( '#map2' ) } );</pre>
+<h3>コンストラクタのパラメータオブジェクト</h3>
+<p>　PECO.Mapのコンストラクタに与えるパラメータオブジェクトでは，owner以外にも様々な値が設定できます．たとえば，zoomやcenterでズームレベルや表示中央を指定できます．minZoom,
+maxZoomはそれぞれズームレベルの最小値と最大値を指定できます．zoomとcenterに関しては，Mapオブジェクト生成後に値を変更したり，MapオブジェクトのメソッドsetZoom()とsetCenter()現在の値を変更できます．これらのメソッドは引数を与えるとその値に変更し，与えなくても与えても最終的な値を返します．minZoom,
+maxZoomについては値の変更はできませんが，オブジェクトのプロパティとして値を取得できます．<br>
+　また，setBounds()メソッドを使用すると，引数で指定した範囲が表示されるように自動的に地図の範囲を調整します．引数には南西と北東の地理座標を指定し，関数の戻り値は最終的な範囲を返します．引数を省略すると現在の設定値が返されます．</p>
+<h4 class="source">サンプル (<a href="sample/3_mapparam.html"> 3_mapparam.html</a> )　センターやズームレベルを操作</h4>
+<pre class="source">var _map = PECO.map( {
+  owner: 'map', 
+  zoom: 10,
+  minZoom: 5,
+  maxZoom: 13,
+  center: { lat: 35.3606, lng: 138.7274 }
+} );
+
+function disp(){
+  function round4( x ) {
+    return Math.round (x * 1000 ) / 1000;
+  }
+  var _z = _map.setZoom();
+  var _ll = _map.setCenter();
+  var _bounds = _map.setBounds();
+  var _s = 'z: ' + _z + ', center: [ ';
+  _s += round4( _ll.lat ) + ', ' + round4( _ll.lng ) +  ']';
+  _s += ', minZoom: ' + _map.minZoom + ', maxZoom: ' + _map.maxZoom;
+  document.querySelector( '#output' ).innerHTML = _s;
+  var _s2 = 'bounds: [';
+  _s2 += round4( _bounds[0].lat ) + ', ' + round4( _bounds[0].lng ) + '], [';
+  _s2 += round4( _bounds[1].lat ) + ', ' + round4( _bounds[1].lng ) + ']';
+  document.querySelector( '#bounds' ).innerHTML = _s2;
+}
+
+disp();
+
+function change1() {
+  _map.setZoom( 12 );
+  setTimeout( function() { disp();
+    _map.setCenter( { lat: 35.6896, lng: 139.6917 } );
+   }, 500 );
+}
+function change2() {
+  _map.setBounds( [ [ 36, 140], [37, 141] ] );
+  setTimeout( function() { disp() }, 500 );
+}</pre>
+<p>　デフォルトのLeafletは，デフォルトでは中心位置やズームレベル変更されたときにアニメーション表示します．このため，連続して操作しようとすると，描画されなかったり，誤った値を取得してしまったりします．そのため，上記サンプルでは少し時間をおいて次の処理に移るようにしています．</p>
+<h3>マーカーとポップアップ</h3>
+<p>　マーカーやポップアップを表示させるには，MapオブジェクトのMap.addMarker()やMap.addPopup()メソッドを使用します．これらのメソッドの第1引数には位置を表すオブジェクトを記述します．addMarker()の第2引数にはパラメータオブジェクトを指定し，そのpopupにテキスト（やHTMLフラグメント）を指定すると，クリック時にポップアップを表示できるようになります．addPopup()メソッドでは，第2引数にはテキスト（またはHTMLフラグメント）を直接指定します．<br>
+　追加したマーカーやポップアップを削除するにはMapオブジェクトの delMarker(), delPopup()メソッドを使用します．これらのメソッドは，それぞれ最後に追加したものを削除します．</p>
+<p class="sample">サンプル ( <a href="sample/4_marker.html">4_marker.html</a> )　マーカーとポップアップを表示</p>
+<pre class="source">_map.addMarker(
+  { lat: 35.3606, lng: 138.7274 },
+  { popup: '富士山' } 
+);
+_map.addPopup( [ 35.6896, 139.6917 ], '東京' );
+
+function delmarker() {
+  _map.delMarker();
+  _map.delPopup();
+}</pre>
+<h2>位置と矩形範囲</h2>
+<p>　ここで，Mapのcenter()メソッドなどで使う地理上の位置や矩形範囲の指定法について整理しておきます．なお，pecomap.jsでは，位置や矩形範囲を示すための専用のクラスを提供されず，オブジェクトリテラル（直接記述したもの）を使用します．</p>
+<h3>位置( LatLng )</h3>
+<p>　位置の指定は，原則としてlat, lngを持つオブジェクトで行います．</p>
+<blockquote>{ lat: '39.27, lng :'139.4' }</blockquote>
+<p>　しかし，簡便法として，緯度，経度の順で並べた数値配列も使用できます．pecomap.jsで地理上の位置を指定する場合はすべて内部で変換されて使用されます．</p>
+<blockquote>[ 29,27, 139.4 ]</blockquote>
+<h3>矩形範囲( LatLngBounds )</h3>
+<p>　矩形範囲は，南西端と北東端の位置のオブジェクトを二つ並べた配列として記述します．</p>
+<blockquote>[ { lat: '39.17, lng :'139.4' , { lat: '39.27, lng :'140.3' } ]</blockquote>
+<p>　矩形範囲で使用する2つの位置も，省略して配列として指定することができます．</p>
+<blockquote>[ [ 39.17, 139.4 ], [ 39.27, 140.3 ] ]</blockquote>
+<blockquote>※LeafltのL.latLngBounds()も，南西と北東を指定します．</blockquote>
+<h2>Layer</h2>
+<h3>レイヤー</h3>
+<p>　Layerオブジェクトは，描画される各レイヤーを表します．pecomap.ｊｓでは背景レイヤーとオーバレイレイヤーを分けて扱いますが，レイヤオブジェクト自体に区別はなく，同一仕様のものを使います．Layerオブジェクトはオブジェクトリテラル（文字列）として指定します．専用のクラスやファクトリーメソッドなどはありません．オブジェクトリテラルをMapコンストラクタのパラメータオブジェクトや，addOverlay()メソッドの引数として与えることにより，ライブラリに登録され，必要なメソッドが追加されます．<br>
+　レイヤーオブジェクトの各プロパティについていくつか補足します．idプロパティやtitleプロパティはいずれもレイヤーを識別するのに使用できます．id属性はライブラリ内では特に使用されませんが，titleプロパティはレイヤーコントローラで表示される内容となります．</p>
+<h4>・URLテンプレート</h4>
+<p>　urlプロパティにはタイル画像を識別するテンプレートを指定します（URLテンプレートと呼びます）．URLテンプレート内には，{x}, {y},
+{z}のキーワードを埋め込むことができ，実際のタイル画像をロードする際には，それぞれタイルのX座標, Y座標，ブームレベルに変換されます．なお，それらは必ず埋め込まなければならないというわけではなく，全く含まなくてもかまいません（すべてのタイルで同一の画像を使うことになりますが）．<span style="color: rgb(0, 0, 0); font-family: 'MS PGothic'; font-size: medium; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none;">また，その他に任意の変数を{}に挟んで埋め込んでキーワードとすることができ，その場合はLayerオブジェクトの同名のプロパティの値に置き換えられます．</span></p>
+<h3>背景レイヤー</h3>
+<p>　PECO.Mapのコンストラクタのパラメータオブジェクトを使って，背景レイヤーを変更することができます．背景レイヤーを変更するにはパラメータオブジェクトのbasesプロパティに背景レイヤーの情報を記述したレイヤーオブジェクトを設定します．レイヤーオブジェクトのurlにはタイルを読みだすためのテンプレートを指定します．レイヤーオブジェクトは複数指定することができ，その場合は最後に指定したものがデフォルトで表示されます．<br>
+　また，Mapのbases()メソッドで，引数にid属性値（またはtitle属性値）を指定して，背景レイヤーオブジェクトを取得できます．引数を省略するとすべての背景レイヤーがリストで返されます．</p>
+<p class="sample">サンプル( <a href="sample/5_base.html">5_base.html</a> )　背景レイヤー</p>
+<pre class="source">var _map = PECO.map( { owner: 'map', bases: [
+  {
+    title: '地理院地図',
+        url: 'http://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',
+        attribution: '&lt;a href=&quot;http://portal.cyberjapan.jp/help/termsofuse.html&quot; target=&quot;_blank&quot;&gt;国土地理院&lt;/a&gt;',
+        minZoom: 0, 
+        maxZoom: 18,
+  },
+  {
+    id: 'OSM',
+    title: 'Open Street Map',
+    url: 'http://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&lt;a href=&quot;http://osm.jp/&quot;&gt;Open Street Map&lt;/a&gt;',
+  },
+] } );
+_map.layerControl();
+
+function showInfo( selector, layer ){
+  var _s = '[' + layer.title + '] ';
+  _s += 'id: ' + layer.id + ', url: ' + layer.url;
+  document.querySelector( selector ).innerHTML = _s;
+}
+
+showInfo( '#out1', _map.bases( '地理院地図' ) );
+showInfo( '#out2', _map.bases( 'OSM' ) );</pre>
+<h3>オーバーレイレイヤー</h3>
+<p>　PECO.Map()コンストラクタのパラメータオブジェクトを使って，背景地図の上に重ね合わせるレイヤーを指定できます．重ね合わせにはoverlaysプロパティにレイヤー情報を設定します．オーバーレイの場合は，不透明度(opacity)も指定できます（0～1)．また，ovaleysで複数のレイヤー情報を配列で指定できます．この場合はこの順に下から重ねられます．<br>
+　オーバーレイレイヤーは，Map生成後にも，MapオブジェクトのaddOverlay()メソッドを使って追加することができます．また，MapオブジェクトのdelOverlay()メソッドでレイヤーを削除することができます．delOverlayでは，引数を指定するとid属性値（またはtitle属性値）で検索され，見つかると削除されます．引数を省略すると最後に追加したレイヤーが削除されます．<br>
+　背景レイヤーと同様に，オーバーレイレイヤーでもMapのovelays（）メソッドを使ってレイヤー情報を取得することができます．引数に一致するid属性値（またはtitle属性値）を持つレイヤーが検索されます．引数を省略するとすべてのレイヤーのリストが配列で返されます．</p>
+<p class="sample">サンプル( <a href="sample/6_overlay.html">6_overlay.html</a> )　オーバーレイ</p>
+<pre class="source">var _map = PECO.map( {
+  owner: 'map',
+  zoom: 10, 
+  center: { lat: 35.3606, lng: 138.7274 },
+  overlays: [
+    {
+      id: 'seamless',
+      title: 'シームレス地質図',
+      url: 'https://gbank.gsj.jp/seamless/tilemap/{type}/glfn/{z}/{y}/{x}.png',
+      attribution: '&lt;a href=&quot;https://gbank.gsj.jp/seamless/&quot;&gt;日本シームレス地質図&lt;/a&gt;',
+      minZoom: 5,
+      maxZoom: 13,
+      opacity: 0.6,
+      type: 'basic',
+    }
+  ]
+} );
+_map.addOverlay( {
+  title: '日本重力データベース(2.30)',
+  url: 'https://gbank.gsj.jp/tilemap/wmts/1.0.0/BouguerAnomaly230/default/EPSG900913/{z}/{y}/{x}.png',
+  attribution: '&lt;a href=&quot;https://www.gsj.jp/researches/geoinfo-service/index.html&quot;&gt;地質調査総合センター&lt;/&gt;'
+} );
+_map.layerControl();
+var _layer = _map.overlays( 'シームレス地質図' );
+var _s;
+_s = 'レイヤ情報[ ' + _layer.title + ' ], id: ' + _layer.id;
+_s += ', url: ' + _layer.url;
+document.querySelector( '#out' ).innerHTML = _s;
+
+function change( event ) {
+  _map.overlays('seamless').set( { type: event.value } );
+}
+function changeopacity() {
+  _map.overlays( 'seamless' ).setOpacity( 0.3 );
+}
+function deloverlay() {
+  _map.delOverlay();
+}</pre>
+<p>　なお，このオーバーレイオブジェクトのopacityプロパティを変更する場合は，専用のメソッドsetOpacity()を使用してください．また，上記のようにset()メソッドでlayerのプロパティを変更することができますので，set(
+{ opacity: *** } )としてもかまいません．</p>
+<h2>コントロール</h2>
+<p>　地図上に表示させるパーツをコントロールと呼んでいます．コントロールを表示させるにはコントロールごとに専用のメソッドがMapオブジェクトに用意されています．スケールバーを表示するときにはscaleControl()を，レイヤー切り替えボタンを表示するときはlayerControl()を引数なし（またはtrueを設定して）で呼び出します．それらを非表示にしたい場合は引数にfalseを指定して呼び出します．</p>
+<h4 class="sample">サンプル( <a href="sample/7_controls.html">7_controls.html</a> )　スケールコントロール，レイヤーコントロールの表示</h4>
+<blockquote>
+<pre class="source">  &lt;input type=&quot;checkbox&quot; checked=&quot;checked&quot; onclick=&quot;change(this)&quot;&gt;
+    コントロールを表示
+  &lt;/input&gt;
+
+...
+
+_map.scaleControl();
+_map.layerControl();
+
+function change( target ) {
+  _map.scaleControl( target.checked );
+  _map.layerControl( target.checked );
+}</pre>
+</blockquote>
+<h2>イベント</h2>
+<p>　マウスクリックなどのユーザ操作に対応させるには，Map.addeventListner()メソッドを使ってイベントハンドラを記述します．このメソッドの第1引数にはイベントタイプを文字列で指定し，第2引数にはイベントハンドラとなる関数を記述します．<br>
+　イベントタイプはには以下が指定でっきます．</p>
+<ul>
+  <li>click
+  <li>dblclick
+  <li>mousedown
+  <li>mouseup
+  <li>mouseover
+  <li>mouseout
+  <li>mousemove
+</ul>
+<p>　イベントハンドラの唯一の引数はイベントオブジェクトで，以下のプロパティを持ちます．</p>
+<ul>
+  <li>type...イベントタイプ
+  <li>latLng...イベント発生位置
+  <li>target...イベント発生オブジェクト
+  <li>domEvent...オリジナルのDOMイベント
+  <li>originalEvent...マップエンジンを実装するライブラリ内のオリジナルイベント
+</ul>
+<h4 class="sample">サンプル ( <a href="sample/8_click.html">8_click.html</a> )　クリックに対し反応</h4>
+
+<pre class="source">_map.addEventListener( 'click', function( event ) {
+  var _ll = event.latLng;
+  var _s = 'type: ' + event.type + '&lt;br /&gt;';
+  var _p = PECO.latLngToPoint( _ll, _map.setZoom() );
+  var _layer = _map.overlays( 'seamless' );
+  _s += '緯度: ' + _ll.lat + ', 経度: ' + _ll.lng + '&lt;br /&gt;';
+  _s += 'ピクセル座標 x:' + _p.x + ', y: ' + _p.y + '&lt;br /&gt;';
+  _layer.getPixel( _ll, _map.setZoom(), function( data ) {
+    _s += 'RGB: ' + [ data.r, data.g, data.b ];
+    _map.addPopup( _ll, _s );
+  } ); 
+} );</pre>
+<h4>・座標変換関数</h4>
+<p>　pecomap.jsでは，ピクセル座標と地理上の座標を変換するための関数が提供されています．それらの関数はPECO名前空間に直接置かれます．latLngToPoint()は，地理上の位置(LatLng）とズームレベルを引数にとり，ピクセル座標（世界全体内での位置）を返します．pointToLatLng()はその逆を行います．なお，ここでピクセル座標と呼んでいるのは，ズームレベルが与えられた時にタイル画像のサイズを256とし，原点を左上に置いた時の座標です．ズームレベルに依存する点と，タイルサイズが256pxに固定されている点に注意してください．</p>
+
+<h2>レイヤーの拡張</h2>
+<p>　レイヤは，デフォルトではURLテンプレートに基づいてタイル画像のURLを生成し，その画像を使ってタイルマップを描画しますが，いくつかのメソッドを記述することによりこの動作を変更できます．</p>
+<h3>Canvasへの描画</h3>
+<p>　レイヤにdrawTile()メソッドを実装すると，通常の画像表示ではなく，キャンバスに直接描画できるようになります．drawTile()メソッドでは，canvas,
+coord の2つの引数を受け取って描画を行います．coordはx,y（タイル座標）とz(ズームレベル)プロパティを持ち，これらを使ってCanvasに描画します．URLテンプレートを使う必要はありません（もちろん使ってもかまいません）．</p>
+<h4 class="sample">サンプル( <a href="sample/9_canvas.html">9_canvas.html</a> )　キャンバスに描画するタイル</h4>
+<pre class="source">var _map = PECO.map( {
+  owner: 'map', 
+  zoom: 10,
+  center: { lat: 35.3606, lng: 138.7274 },
+   overlays: [
+    {
+      title: 'タイル座標',
+      attribution: 'タイル座標',
+      drawTile: function( canvas, coord ) {
+        var _ctx =canvas.getContext( '2d' );
+        _ctx.strokeStyle = 'rgb(0, 0, 256)';
+        _ctx.fillStyle = 'rgb(0, 0, 256)';
+        _ctx.font = '32px &quot;Arial&quot;';
+        _ctx.strokeRect( 0, 0, 256, 256 );
+        _ctx.fillText( 'z = ' + coord.z, 10, 30);
+        _ctx.fillText( 'x = ' + coord.x, 10, 60);
+        _ctx.fillText( 'y = ' + coord.y, 10, 90);
+      }
+    }
+  ]
+} );</pre>
+<h3>画像の変換</h3>
+<p>　レイヤオブジェクトのconvertTile()メソッドを記述すると，画像ファイルを変換して描画することができます．引数はdrawTile()と同じですが，canvasには，タイル画像が描かれた状態で呼び出されます．このため，何も処理せずにメソッドを終了すると，通常のタイル表示と同じ動作になります．下の例では，PNG標高タイルを呼び出して，100m以外を青く，それ以外を透明にする処理をしています．</p>
+<h4>サンプル( <a href="sample/10_convert.html">10_convert.html</a> )　画像を変換するタイル</h4>
+<pre class="source">  overlays: [
+    {
+      title: '浸水タイル',
+      url: 'http://gsj-seamless.jp/labs/elev/m/{z}/{y}/{x}.png',
+      attribution: '&lt;a href=&quot;http://gsj-seamless.jp/labs/&quot;&gt;シームレス地質図ラボ&lt;/a&gt;',
+      minZoom: 5,
+      maxZoom: 13,
+      opacity: 0.6,
+      convertTile: function( canvas, coord, zoom ) {
+        var _ctx =canvas.getContext( '2d' );
+        var _data = _ctx.getImageData( 0, 0, canvas.width, canvas.height );
+        for ( var i = 0; i &lt; _data.data.length; i += 4 ){
+          var _r = _data.data[i];
+          var _g = _data.data[i+1];
+          var _b = _data.data[i+2];
+          if ( _r + _g*256 &lt; 100  ){
+            _data.data[i] = 0;
+            _data.data[i+1] = 0;
+            _data.data[i+2] = 255;
+          } else {
+            _data.data[i+3] = 0;
+          }
+        }  
+        _ctx.clearRect( 0, 0, canvas.width, canvas.height );  
+        _ctx.putImageData( _data, 0, 0 );  
+      }
+    }
+  ]</pre>
+<h3>ピクセル情報の取得</h3>
+<p>　レイヤオブジェクトに用意されているgetPixel()メソッドを使用すると，地理上の位置（緯度経度）に相当する位置のピクセルの色を取得することができます．引数には，緯度経度(LatLng)とズームレベルを指定します．戻り値は,r,g,b,aの4つのプロパティを持つオブジェクトです．</p>
+<h2>既知の問題点</h2>
+  <ul>
+  <li>iPad Air, iPad Mini でattributionが表示されません．Leaflet単体でも発生するので，iOS7の動作に起因する問題かも知れません．
+</ul>
+<hr>
+<p align="center">2014年3月10日更新 © ペコ</p>
+</body>
+</html>

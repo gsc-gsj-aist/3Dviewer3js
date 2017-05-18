@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<!-- leaflet190_simple.html, S-mapサンプル - ラバーバンドとイメージカット
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - ラバーバンドとイメージカット</title>
+	<style>
+body { margin:0px; }
+#map {
+	width: 600px; height: 300px;
+}
+#out {
+	width: 600px, height: 300px;
+}
+h1 { font-size: 16pt; }
+	</style>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
+	<script src="../lib/jszip/jszip.min.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>S-mapサンプル - ラバーバンドとイメージカット</h1>
+	<input id="select" type="checkbox" checked="checked">矩形選択</input>
+	<input id="chiriin" type="checkbox" checked="checked">地理院地図を含む</input>
+	<br />
+	<span>( マウスボタンを押すと選択開始，押したままドラッグで範囲変更，マウスボタンを離すと範囲確定 )</span>
+
+	<div id="map"></div>
+	<span>結果</span><span id="size"></span>
+	<button id="savepng" disabled="true">PNGに保存</button>
+	<button id="savekmz" disabled="true">KMZに保存</button><br />
+	<canvas id="out"></canvas>
+	<script>
+
+'use strict';
+
+( function() {
+
+	var
+		map,
+		rubbarband,
+		latLngs,
+		startLatLng,
+		stopLatLng,
+		seamless,
+		selecting = false,
+		target,							// カットターゲット
+		bounds = { sw: {}, ne: {} };	// ダミー
+
+	map = Smap.map( {
+		owner: 'map',
+		center: { lat: 35.5, lng: 138.7273 },
+		zoom: 8,
+	} );
+	target = map;
+
+	seamless = map.addOverlay( {
+    	url: 'http://gsj-seamless.jp/seamless/tilemap/{type}/glfn/{z}/{y}/{x}.png',
+		title: 'シームレス地質図(詳細版)',
+    	attribution: 'AIST GSJ',
+		attribution_url: 'https://gbank.gsj.jp/seamless/',
+    	minZoom: 5,
+    	maxZoom: 13,
+		opacity: 0.5,
+		bounds: { sw: { lat:20.4, lng: 122.78 }, ne: { lat: 45.58, lng: 154.78 } },
+		type: 'detailed',
+	} ); 
+
+	latLngs = [ // 値はダミー
+	    Smap.latLng( 35.8, 138 ),
+    	Smap.latLng( 35.8, 139 ),
+    	Smap.latLng( 35.0, 139 ),
+    	Smap.latLng( 35.0, 138 )
+	];
+
+	rubbarband = map.addPolyline( [], true, 
+		{ stroke: 'red', strokeOpacity: 0.5, strokeWidth: 5 } 
+	);
+
+//	map.original.dragging.disable();
+	map.set( 'draggable', false );
+
+	map.on( 'mousemove', function( event ) {
+		if ( document.getElementById( 'select' ).checked && selecting ) {
+			latLngs[1].lng = event.latLng.lng;
+			latLngs[2] = event.latLng;
+			latLngs[3].lat = event.latLng.lat;
+			rubbarband.setLatLngs( latLngs );
+		}
+	} );
+	
+
+	map.on( 'mousedown', function( event ) {
+		if ( document.getElementById( 'select' ).checked && !selecting) {
+			startLatLng = event.latLng
+			latLngs[0] = event.latLng;
+			latLngs[1].lat = event.latLng.lat;
+			latLngs[3].lng = event.latLng.lng;
+			selecting = true;
+		}
+	} );
+
+	map.on( 'mouseup', function( event ) {
+		var
+			outSmapanvas = document.getElementById( 'out' ),
+			ctx = outSmapanvas.getContext( '2d' );
+
+		if ( document.getElementById( 'select' ).checked && selecting ) {
+			stopLatLng = event.latLng;
+			selecting = false;
+			bounds.sw.lat = Math.min( startLatLng.lat, stopLatLng.lat );
+			bounds.sw.lng = Math.min( startLatLng.lng, stopLatLng.lng );
+			bounds.ne.lat = Math.max( startLatLng.lat, stopLatLng.lat );
+			bounds.ne.lng = Math.max( startLatLng.lng, stopLatLng.lng );
+			target.cutImage( bounds ).then( function( canvas ) {
+				var
+					size;
+				outSmapanvas.width = canvas.width;
+				outSmapanvas.height = canvas.height;
+				ctx.fillStyle = 'rgb(255,255,255)';
+				ctx.fillRect( 0, 0, outSmapanvas.width, outSmapanvas.height );
+				ctx.drawImage( canvas, 0, 0, canvas.width, canvas.height );
+				// Base64で表現されているため，データサイズは3/4にする
+				size = ( canvas.toDataURL().length / 1000 * 3 / 4 ).toFixed();
+				document.getElementById( 'size' ).innerHTML = ' (約' + size + 'Mb) ';
+			} );
+			document.getElementById( 'savepng' ).disabled = false;			
+			document.getElementById( 'savekmz' ).disabled = false;			
+		}
+	} );
+
+	document.getElementById( 'select' ).addEventListener( 'click', function( event ) {
+		map.setDraggable( !this.checked );
+	} );
+
+	document.getElementById( 'chiriin' ).addEventListener( 'click', function( event ) {
+		target = ( this.checked ) ? map : seamless;
+	} );
+
+	document.getElementById( 'savepng' ).addEventListener( 'click', function( event ) {
+		target.cutImage( bounds, null, 'sample.png' );
+	} );
+
+	document.getElementById( 'savekmz' ).addEventListener( 'click', function( event ) {
+		target.cutImage( bounds, null, 'sample.kmz' );
+	} );
+
+} )();
+
+	</script>
+</body>
+</html>

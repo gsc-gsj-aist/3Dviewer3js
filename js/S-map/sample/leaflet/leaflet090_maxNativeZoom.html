@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!-- leaflet090_simple.html, S-mapサンプル - 最大ズームレベルを超えての利用
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - 最大ズームレベルを超えての利用</title>
+	<style>
+body { margin:0px; }
+#map {
+  position: absolute;
+  top:0px; bottom: 0px; left: 0px; right: 0px;
+}
+#side {
+  position: absolute;
+  top: 10px; bottom: 50px; left: 10px; width: 200px;
+  background: white;
+  padding: 5px;
+}
+	</style>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<div id="map"></div>
+	<script>
+
+'use stric';
+
+//// アプリケーション本体
+( function() {
+
+	var
+		map;
+
+	map = Smap.map( {
+		owner: 'map',
+		overlays: [ {
+//		    	url: 'https://gbank.gsj.jp/seamless/tilemap/{type}/{layer}/{z}/{y}/{x}.png',
+	    	url: 'http://gsj-seamless.jp/seamless/tilemap/{type}/{layer}/{z}/{y}/{x}.png',
+    		title: 'シームレス地質図(詳細版)',
+	    	attribution: 'GSJ/AIST',
+    		attributionUrl: 'https://gbank.gsj.jp/seamless/',
+	    	minZoom: 5,
+	    	maxZoom: 15,
+	    	maxNativeZoom: 13,
+    		opacity: 0.6,
+    		type: 'detailed',
+	    	layer: 'glfn'
+		} ],
+    	center: { lat: 35, lng: 137.409 },
+    	minZoom: 5,
+    	maxZoom: 15,
+      	zoom: 13
+    } );
+
+} ) ();
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transnewitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta name="GENERATOR" content="JustSystems Homepage Builder Version 20.0.3.0 for Windows">
+<link href="common.css" rel="stylesheet" type="text/css">
+  <title>S-map － クイックスタート</title>
+</head>
+<body>
+
+<div id="header">
+<table align="center">
+<tr>
+<td><a href="index.html">　Home　</a></td>
+<td class="select">クイックスタート</td>
+<td><a href="api.html">　API　</a></td>
+<td><a href="explanation.html"> 解説 </a></td>
+<td><a href="extension.html">拡張ガイド</a></td>
+<td><a href="update.html">更新履歴</a></td>
+<tr/>
+</table>
+</div>
+
+<h1>S-map － クイックスタート</h1>
+<h2>準備</h2>
+<p>　S-mapは単一のファイル smap.js で提供されます．<a href="../gsjmap-0.1.0.zip">ダウロード</a>して適当なフォルダに配置して使うか，以下のURLを直接呼び出して利用してください．</p>
+<blockquote>http://gsj-seamless.jp/labs/smap/smap.js<br>
+※ただし，このURLは変更になる可能性があります．</blockquote>
+<p>　また，S-mapはデフォルト設定では地図描画エンジンとして <a href="http://leafletjs.com/">Leaflet.js ( http://leafletjs.com/ )</a> を利用します．Leaflet.jsもまた直接呼び出すか，ダウンロードして利用できるようにしてください．Leaflet.jsは専用のCSSも必要とするので，例えば以上を外部サーバ上から使って最小限のアプリケーションを作成すると，以下のようになります．</p>
+<pre class="source">&lt;!DOCTYPE&gt;
+&lt;html height=&quot;100%&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;/&gt;
+    &lt;script src=&quot;http://leafletjs.com/dist/leaflet.js&quot;&gt;&lt;/script&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;http://leafletjs.com/dist/leafmlet.css&quot; /&gt;
+    &lt;script src=&quot;http://gsj-seamless.jp/labs/gsjmap/gsjmap.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body widrh=&quot;100%&quot; height=&quot;100%&quot; onload=&quot;Smap.map();&quot; /&gt;
+&lt;/html&gt;</pre>
+<blockquote>（サンプルファイル）　<a href="../sample/leaflet/leaflet010_minimum.html">ミニマム版</a></blockquote>
+<h2>地図を表示する - Mapオブジェクト</h2>
+<h3>もっとも単純な例</h3>
+<p>　S-mapで地図を描くには，Smap.map() 関数を使用します．S-mapでは，なるべくデフォルト設定で操作できるようになているので，map()
+関数も引数なしの次の1行で地図を描くことができます．</p>
+<pre class="source">Smap.map();</pre>
+<p>　map()関数はMapオブジェクトを生成して返しますが，地図を描くだけなら戻り値を使用する必要はありません．<br>
+　引数に何も指定しない場合，map() 関数は &lt;body&gt; 要素全体を使ってズームレベル０，中心緯度0度，経度0度で，地理院地図の標準タイルを使って世界地図を描きます．また，地図描画エンジンには
+Leaflet.js を使用します．ただし，body要素に適当なスタイルが設定されていないと結局は地図が描かれませんので注意してください．<br>
+　以下にサンプルコードを示します．</p>
+<pre class="source">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;ja&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot; /&gt;
+    &lt;style&gt;
+html, body { margin: 0px; width: 100%; height: 100% }
+    &lt;/style&gt;
+    &lt;script src=&quot;http://leafletjs.com/dist/leaflet.js&quot;&gt;&lt;/script&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;http://leafletjs.com/dist/leaflet.css&quot; /&gt;
+    &lt;script src=&quot;http://gsj-seamless.jp/labs/gsjmap/gsjmap.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;script&gt;
+
+'use strict';
+( function() {
+    Smap.map();
+} )();
+
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+<blockquote>（サンプルファイル）　<a href="../sample/leaflet/leaflet020_simple.html">シンプルアプリ</a></blockquote>
+<h3>地図を描画する要素の指定</h3>
+<p>　もちろん，地図を描画する先のHMTLオブジェクトを &lt;body&gt; 要素以外に指定することができます．描画先要素は，map()関数の引数としてオブジェクトを渡しそのプロパティで指定します．引数のオブジェクトは初期化用パラメータオブジェクトと解され，このオブジェクトのownerプロパティにid属性または直接HTML要素を設定することによって，描画先要素を指定できます．なお，関数に複数の引数を並べるのでは無く，１つのオブジェクトを引数としてそのプロパティで設定する方法は，S-mapでは多く利用されます．この用途のオブジェクトをパラメータオブジェクトと呼んでいます．<br>
+　地図を描く要素を指定する方法にはもうひとつあり，Smap.map()の引数に文字列として，描画先HTML要素のid属性値を指定します．描画先要素の指定は良く使う機能なので直接指定できるようになっています．</p>
+<pre class="source">    &lt;div id=&quot;map1&quot;&gt;&lt;/div&gt;
+    &lt;div id=&quot;map2&quot;&gt;&lt;/div&gt;
+
+...
+
+    Smap.map( 'map1' );
+    Smap.map( { owner: 'map2' } );</pre>
+<blockquote>（サンプルファイル）　<a href="../sample/leaflet/leaflet040_owner.html">描画先のdiv要素指定</a></blockquote>
+<h2>表示を調整する - setZoom(), setCenter(), setBounds()</h2>
+<p>　Smap.map()に与えるパラメータオブジェクトでは，owner以外にも様々な値が設定できます．たとえば，zoomやcenterでズームレベルや表示中央地理座標（緯度と経度）を指定できます．minZoom,
+maxZoomはそれぞれズームレベルの最小値と最大値を指定できます．<br>
+　zoomとcenterに関しては，MapオブジェクトのメソッドsetZoom()とsetCenter()で値を変更できます．これらのメソッドは引数を与えなくても与えても最終的な値を返すので，値を取得するだけの場合も利用できます．zoomとcenterを同時に設定するときはsetView()メソッドが使えます．minZoom,
+maxZoomについては値の変更はできませんが，Mapオブジェクトのプロパティとして値を取得できます．<br>
+　また，setBounds()メソッドを使用すると，引数で指定した範囲が表示されるように自動的に地図の範囲を調整します．引数には南西と北東の地理座標を指定し，関数の戻り値は最終的な範囲を返します．setBounds()も引数を省略すると現在の設定値を返します．</p>
+<pre>    map.setZoom( 10 );
+    map.setCenter( { lat: 35.6896, lng: 139.6917  );
+    map.setView( { center: [ 35.6896, 139.6917 ], zoom: 10 } );
+    map.setBounds( [ [ 36, 140], [37, 141] ], { animate: false } );</pre>
+<blockquote>(サンプルファイル)　<a href="../sample/leaflet/leaflet050_view.html">センター，範囲，ズームを設定・取得</a></blockquote>
+<p>　Smapapでは，緯度経度(LatLngオブジェクト)や緯度経度範囲(Boundsオブジェクト)の指定で様々な略記法が使えます．LatLngは，lad(緯度)とlng(経度)をプロパティとするオブジェクトですが，数値の配列やカンマ区切り文字列からLatLngオブジェクトを生成する関数Smap.latLng()が提供されています．例えば，上記のsetView()メソッドの内部では，まず最初にcenterプロパティに対してSmap.latLng()を呼び出して引数を整形するので，上記のような配列でも指定できるようになっています．</p>
+<h2>オーバーレイレイヤーを設定する</h2>
+<p>　背景地図の上に重ね合わせるレイヤー（オーバレイレイヤー）を利用するには，Smap.map() 関数のパラメータオブジェクトのoverlaysプロパティにレイヤー情報(Layerオブジェクト)の配列を設定します．複数のレイヤーを重ねられるので配列になっていて，下から順に重ねられます．<br>
+　Layerオブジェジェクトの必須プロパティはurlで，通常はタイルマップのテンプレートを指定します．このテンプレートはタイル画像を取得するために使われるもので，テンプレート内に{x},
+{y}, {z}のキーワードを埋め込むと，その部分が実際のタイル座標とズーム値に置き換えられて使用されます．Layerオブジェクトのプロパティでは様々な値が設定でき，例えばopacietyで不透明度（0～1)が指定できます．</p>
+<pre class="source">        map = Smap.map( {
+                owner: 'map',
+                overlays: [ {
+                        url: 'http://gsj-seamless.jp/seamless/tilemap/{type}/{layer}/{z}/{y}/{x}.png',
+                        title: 'シームレス地質図(詳細版)',
+                        attribution: 'AIST GSJ',
+                        attribution_url: 'https://gbank.gsj.jp/seamless/',
+                        minZoom: 5,
+                        maxZoom: 13,
+                        opacity: 1,
+                        bounds: { sw: { lat:20.4, lng: 122.78 }, ne: { lat: 45.58, lng: 154.78 } },
+                        type: 'detailed',
+                        layer: 'glfn'
+                } ],
+                center: { lat: 34.637, lng: 137.409 },
+                minZoom: 5,
+                maxZoom: 13,
+                zoom: 10
+            } ),</pre>
+<blockquote>(サンプルファイル)　<a href="../sample/leaflet/leaflet070_overlay.html">オーバーレイレイヤー</a></blockquote>
+<p>　上記の例のように，タイルテンプレート内には{x}, {y}, {z}以外のキーワード（上の例では{type}, {layer}）も埋め込むことができます．それらはLayerオブジェクト内の同名のプロパティの値で置き換えられます．</p>
+<p>　オーバーレイレイヤーは，Map生成後にも，MapオブジェクトのaddOverlay()メソッドやremoveOverlay()メソッドを使って追加や削除ができます．removeOverlay()では，引数を指定するとid属性値（またはtitle属性値）で検索され，見つかると削除されます．引数を省略すると全てのレイヤーが削除されます．</p>
+<h2>背景レイヤーを変更する</h2>
+<p>　S-mapでは，デフォルトでは地理院地図（標準）が背景レイヤーとして表示されますが，背景レイヤーに複数のレイヤーを登録して切り替えて使うことができます．<br>
+　背景レイヤーの設定も，オバーレイレイヤーと同様にmap()関数呼び出し時にパラメータオブジェクトを使って，basesフィールドに背景レイヤーのリストを指定して行います．リストの最後のものが最初の背景に使われます．Mapオブジェクト生成後でも，MapオブジェクトのaddBase()関数で背景レイヤーを追加することができます．<br>
+　背景レイヤーの切り替えは，MapオブジェクトのsetBase()関数の引数にLayerオブジェクトのidまたはtitle属性の値を指定して行います（id属性が優先されます）．</p>
+<pre class="source">        map = Smap.map( {
+                owner: 'map',
+                bases: [ Smap.DEFAULT_BASE, {
+                id: 'OpenAerialTiles',
+                        url: 'http://ttiles01.mqcdn.com/tiles/1.0.0/vy/sat/{z}/{x}/{y}.png',
+                        title: 'MapQuest Open Aerial Tiles',
+                        attribution: 'MapQuest',
+                        attribution_url: 'http://developer.mapquest.com/web/products/open/map',
+                        minZoom: 0,
+                        maxZoom: 13,
+                } ],
+                center: { lat: 34.637, lng: 137.409 },
+                maxZoom: 13,
+                zoom: 8,
+        } );
+
+        // addBase()で追加
+        map.addBase( {
+                id: 'OpenStreetMap',
+                url: 'http://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                title: 'Open Street Map',
+                attribution: 'Open Street Map',
+                attribution_url: 'http://osm.jp/',
+                minZoom: 0,
+                maxZoom: 13,
+        } );</pre>
+<blockquote>(サンプルファイル)　<a href="../sample/leaflet/leaflet080_base.html">背景レイヤー</a></blockquote>
+<p>　MapオブジェクトのfindBase()関数で背景レイヤーを検索することができます．この引数にはLayerオブジェクトのidまたはtitle属性の値を指定します（id属性が優先されます）．最初に該当したものが返されます．引数を省略すると，全ての背景レイヤーのリストが返されます．<br>
+　MapオブジェクトのremoveBase()関数で背景レイヤーを検索できます．引数にはLayerオブジェクトを与えます．</p>
+<h2>画像レイヤーやKMLレイヤーを利用する</h2>
+<p>　タイルマップサービスだけでは無く，単独の画像ファイルやKMLファイルもレイヤーとして表示することができます．利用の仕方はタイルレイヤーとまったく同じで，Mapオブジェクトのパラメータオブジェクトで設定するか(bases,
+overlays)，addBase()やaddOverlay()メソッドで行います．これらのメソッドは，引数のパラメータオブジェクトのurlプロパティから自動的にタイルレイヤーであるかやファイルフォーマットを判別します．ただし，画像ファイルを指定する場合は，boundsプロパティでその範囲を指定することが必須です．　</p>
+<pre class="source">       
+                imageLayer = map.add( {
+                        url: '../img/aist.jpg',
+                        bounds: [ 36, 140, 36.66, 141 ],
+                        visibility: false,
+                        opacity: 0.5
+                } );
+                kml = map.add( { url: '../kml/volcanoes.kml' } );</pre>
+<blockquote>(サンプルファイル)　<a href="../sample/leaflet/leaflet130_image.html">画像レイヤー</a><br>
+(サンプルファイル)　<a href="../sample/leaflet/leaflet140_kml.html">KMLレイヤー</a></blockquote>
+<p>　レイヤーの種類やファイルフォーマットの自動判別が期待通りに動作しない場合は，パラメータオブジェクトのtilingプロパティやfiletypeで明示的に指定してください．</p>
+<h2>マーカーやポップアップを表示する</h2>
+<p>　マーカーやポップアップを表示させるには，MapオブジェクトのMap.addMarker()やMap.addPopup()メソッドを使用します．これらのメソッドの第1引数には地理座標を表すLatLngオブジェクトを指定します．addMarker()の第2引数にはパラメータオブジェクトを指定し，そのpopupにテキスト（やHTMLフラグメント）を指定すると，クリック時にポップアップを表示できるようになります．addPopup()メソッドでは，第2引数にはテキスト（またはHTMLフラグメント）を直接指定します．<br>
+　追加したマーカーやポップアップを削除するにはMapオブジェクトの removeMarker(), removelPopup()メソッドを使用し，引数には削除したいMarkerオブジェクトまたはポップアップオブジェクトを指定します．</p>
+<pre class="source">    marker = map.addMarker( 
+            { lat: 36.225278, lng: 140.106667 },
+            {
+                popup: '&lt;h2&gt;筑波山&lt;/h2&gt;&lt;hr /&gt;&lt;p&gt;標高877m&lt;/p&gt;',
+                icon: {
+                        url: 'https://gbank.gsj.jp/volcano/Quat_Vol/kml/icon.png',
+                        anchor: { x: 32, y: 32 },
+                },
+                title: '筑波山'
+            } 
+    );
+    popup = map.addPopup( { lat: 35.3606, lng: 138.7273 }, '富士山' );</pre>
+<blockquote>(サンプルファイル)　<a href="../sample/leaflet/leaflet150_marker.html">マーカーとポップアップ</a></blockquote>
+<h2>ポリゴンやポリラインを描画する</h2>
+<p>　地図上にポリゴンやポリラインを描画することができます．S-mapでは，両者とも同一のオブジェクトPolylineを使用し，メソッドaddPolylineで追加する際の第2引数で区別します（trueの場合がポリゴン，falseの場合がポリライン）．第1引数には地理座標の配列，第3引数にStyleを指定します．Styleオブジェクトではstroke，strokeOpacity,
+fill, fillOpacity等を指定できます．</p>
+<pre>        polyline2 = map.addPolyline( [
+            { lat: 35,   lng: 138 },
+            { lat: 35,   lng: 139 },
+            { lat: 35.8, lng: 139 }
+        ], false, { stroke: 'red', strokeOpacity: 0.5 } );</pre>
+<blockquote>(サンプルファイル)　<a href="../sample/leaflet/leaflet160_polyline.html">ポリラインとポリゴンの描画</a></blockquote>
+<p>　Polylineオブジェクトは，生成後に点を追加したり （addLatLng()メソッド) ，点の配列自体を変更したり ( setLatLngs()メソッド
+) することができます．</p>
+<h2>マウス位置のピクセル情報を取得する</h2>
+<p>　マウス位置の地理座標を取得するには，Mapオブジェクトのon()メソッドを使ってイベントハンドラを記述します．on()メソッドでは，第1引数に'click'，'mousemove'などのイベント名，第2引数にハンドラ（イベント発生時の処理）を指定します．イベントハンドラの引数にはeventオブジェクトが渡され，このオブジェクトのlatLngプロパティで地理座標を取得することができます．<br>
+　さらにS-mapでは，レイヤと地理座標を指定して画像の色情報を取得するメソッド Layer.getPixel()を提供します．このメソッドは緯度経度とズームレベルを引数に与えると，RGBAの長さ4の配列として色情報を取得するプロミスを返します．プロミスにはあまりなじみがないかもしれませんが，値を取り出すのは簡単で，プロミスオブジェクトのthen()メソッドで処理関数を指定するだけです．<br>
+　以下に，クリック位置の色情報を取得して凡例を表示する例を示します．</p>
+<pre>        map.on( 'click', function( event ) {
+                getLegend( event.latLng ).then( function( legend ) {
+                        map.addPopup( event.latLng, legend );
+                } );
+        } );
+
+        function getLegend( latLng ) {
+                var
+                        p = geollayer.getPixel( latLng, map.setZoom() ),
+                        result;
+
+                result = p.then( function( data ) {
+                        var
+                                r = data[0],
+                                g = data[1],
+                                b = data[2],
+                                c = r * 256 * 256 + g * 256 + b,
+                                s;
+
+                        s = 'Lat: ' + latLng.lat.toFixed( 4 )  + ', Lng: ' + latLng.lng.toFixed( 4 )+ '&lt;br /&gt;';
+                        s += 'RGB: ' + r + ',' + g + ',' + b + '&lt;br /&gt;';
+                        if( legend ) { // 凡例が読み込まれたならば
+                                for ( var i = 0 ; i &lt; legend.units.length; i ++ ) {
+                                        if ( parseInt( legend.units[i].fill, 16 ) == c ) {
+                                                s += 'ID: ' + legend.units[i].ID + ' ';
+                                                s += ', Title: ' + legend.units[i].title;
+                                                s += ', Color: ' + legend.units[i].fill;
+                                        }
+                                };
+                        }
+                        return s;
+                } );
+                return result;
+        };</pre>
+<blockquote>(サンプルファイル)　<a href="../sample/leaflet/leaflet190_getPixel.html">マウス位置のピクセル色取得</a></blockquote>
+<p>　なお，この例のように，凡例情報を用意して色情報をキーに凡例を取り出す場合は，Map.legendプロパティとMap.getPixelInfo()メソッドを使う方法も利用できます．</p>
+<h2>ズームや移動のイベントに対応する</h2>
+<p>　ズームや移動のイベントに対応させるには，'zoomstart', 'zoomend', 'move', 'movestart', 'moveend'などに対応するイベントハンドラを，やはりMap.on()メソッドを使って登録します．イベントハンドラに渡される引数(以下の例ではevent)には，typeプロパティにイベント名がセットされます．</p>
+<pre>        var
+                map,
+                out = document.getElementById( 'out' );
+
+        map = Smap.map( {
+                owner: 'map',
+                center: { lat: 35.3606, lng: 138.7273 },
+                zoom: 11,
+                minZoom: 5,
+                maxZoom: 13
+        } );
+
+        map.on( 'zoomstart', function( event ) {
+                out.innerHTML += 'event.type: ' + event.type + '\n';
+        } );
+
+        map.on( 'zoomend', function( event ) {
+                out.innerHTML += 'event.type: ' + event.type + '\n';
+        } );
+
+        map.on( 'move', function( event ) {
+                out.innerHTML += 'event.type: ' + event.type + '\n';
+        } );
+
+        map.on( 'movestart', function( event ) {
+                out.innerHTML += 'event.type: ' + event.type + '\n';
+        } );
+
+        map.on( 'moveend', function( event ) {
+                out.innerHTML += 'event.type: ' + event.type + '\n';
+        } );</pre>
+<blockquote>(サンプルファイル)　<a href="../sample/leaflet/leaflet210_zoom.html">ズームイベントと移動イベント</a></blockquote>
+<h2>ゲームパッドや Leap Motion Controler 利用する</h2>
+<p>　S-mapではデフォルトでゲームパッドを利用することができます．ゲームパッドの操作はGoogle Earthの操作とほぼ同様に実装されています．<br>
+　また，コントローラ（Smap3.controller.leap.js）を追加することにより <a href="https://www.leapmotion.com/?lang=jp">Leap Motion Controler</a>を利用することができます．Leap Motionから提供されるドライバLeap.jsも必要です．これらを&lt;script&gt;要素で読み込んだうえで，Mapオブジェクトの addController( 'leap' ) を実行すると使用できるようになります．こちらも操作はGoogle Earthとほぼ同様で手のひらの前後左右で移動，傾けると回転します．</p>
+<pre>        &lt;script src=&quot;../../lib/leap-0.2.0/leap.js&quot;&gt;&lt;/script&gt;
+        &lt;script src=&quot;../../gsjmap.js&quot;&gt;&lt;/script&gt;
+        &lt;script src=&quot;../../src/Smap.controller.leap.js&quot;&gt;&lt;/script&gt;
+...
+        map.addController( 'leap' );</pre>
+<blockquote>(サンプルファイル)　<a href="../sample/leaflet/leaflet230_controller.html">ゲームパッドとLeap　Motion</a></blockquote>
+<h2>プロミスを利用する</h2>
+<p>　S-mapでは，プロミスという仕組みを導入しました．プロミスは，生成時点ではまだ完了していない処理を表現するオブジェクトで，非同期処理を簡潔に記述するために役立ちます．地図アプリではとくに，地図データはもちろん標高データ，検索データ等多くのデータを非同期に取得して扱いますので，プロミスを利用すると，ネスティングが深くなるのを避けて分かりやすく記述できるようになります．JavaScriptの次期バージョンで導入される予定です．</p>
+<p>　S-mapでは，ファイルのロードなどいくつかの関数がプロミスを返します．それらを利用するのに特に難しいことはなく，従来なら関数呼び出し時に指定するコールバック関数を，プロミスオブジェクトのthen()メソッドで指定するだけです．<br>
+　以下は，Smap.loadText()関数を使ってテキストファイルをロードする例です．この関数は引数にテキストファイルのURLを受け取り，戻り値にはテキストファイルをロードするプロミスを返します．プロミスのthen()メソッドでは，コールバック関数を2つ指定することができ，1つ目が成功時，2つ目が失敗時の処理となります．Smap.loadText()
+の場合は，成功時にはコールバック関数の引数に読み込まれた文字列が渡され，失敗時にはエラーメッセージが渡されます．</p>
+<pre>    var
+        jsonsrc = 'https://gbank.gsj.jp/seamless/legend/detailed.json',
+
+    Smap.loadText( jsonsrc ).then( 
+        function( text ) { // 成功時の処理
+            document.getElementById( 'out1' ).innerHTML = '結果: ' + text.slice( 0, 40 );
+        },
+        function( error ) { // 失敗時の処理
+            document.getElementById( 'out1' ).innerHTML = error.msg;
+        }
+    );</pre>
+<blockquote>(サンプルファイル)　<a href="../sample/common/540_loadText.html">テキストファイルの読み込み</a></blockquote>
+<p>　このほか，S-mapでは，独自のプロミスを生成したり，複数のプロミスを処理する関数を提供しています．</p>
+<h2>これから</h2>
+<p>　以上，S-mapで利用できる機能を駆け足で紹介しました．<br>
+　上記で使ったサンプルコードは，実際に動くサンプルファイルとして用意しています．詳しくはサンプルファイルをご覧ください</p>
+<blockquote>→　<a href="../sample/leaflet/">サンプルファイル</a></blockquote>
+<p>　これから実際にコードを記述していくわけですが，上で紹介した以外にもいくつかの関数，メソッド，プロパティがあります．あまり数は多く無ないので，一度APIリファレンスに目を通していただくと良いでしょう．</p>
+<blockquote>→　<a href="api.html">APIリファレンス</a></blockquote>
+<p>　また，より深くS-mapを活用したい方のための解説ページも用意しています．</p>
+<blockquote>→　<a href="explanation.html">解説</a>　<font color="#ff0000">（2014-10-25現在，記述はプロミスに関するもののみです）</font></blockquote>
+<p>　S-mapは別の描画エンジンに対応したり，コントローラを自作して利用したりできるように作られています．S-mapを拡張したい方は以下の拡張ガイドをご覧ください．</p>
+<blockquote>→　<a href="internal_api.html">拡張ガイド</a>　<font color="#ff0000">（2014-10-25現在，記述が古く，不正確で不完全です）</font></blockquote>
+<hr>
+<p align="center">2016年10月7日更新</p>
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="GENERATOR" content="JustSystems Homepage Builder Version 19.0.5.0 for Windows">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link href="common.css" rel="stylesheet" type="text/css">
+<title>S-map － 拡張ガイド</title>
+</head>
+<body>
+
+<div id="header">
+<table align="center">
+<tr>
+<td><a href="index.html">　Home　</a></td>
+<td><a href="quickstart.html">クイックスタート</a></td>
+<td><a href="api.html">　API　</a></td>
+<td><a href="explanation.html">　解説　</a></td>
+<td class="select">拡張ガイド</td>
+<td><a href="update.html">更新履歴</a></td>
+<tr/>
+</table>
+</div>
+
+<h1>S-map － 拡張ガイド</h1>
+<p>　S-mapは，新たに地図描画エンジンを追加したり，コントローラ，ジオコーダを追加したりといった拡張が可能です．<br>
+　ここでは，これらの拡張を行う際に必要となる情報を提供します．</p>
+<h2><a name="map_facgtory" id="map_facgtory">マップ生成関数</a></h2>
+<p>　地図描画エンジンを実装する場合に最低限必要な作業は，新しいエンジン名を決めることと，マップ生成関数を提供することです．マップ生成関数は，「Smap.engine.エンジン名」に代入してください．この命名法に従うこことによりSmapがエンジンを探し出して使うことができるようになります．<br>
+　以下に新しい地図描画エンジン名を&quot;myleaflet&quot;とした場合の例を示します．</p>
+<pre>        Smap.engine.myleaflet = function( map ) {
+
+                map.original = new L.Map( map.owner, {
+                        center: map.center,
+                        zoom: map.zoom
+                } );
+
+                ...
+
+                return map;
+        };</pre>
+<p>　S-mapは，様々な前処理を行い，メソッド等を追加した後でこのマップ生成関数を呼び出します．マップ生成関数は，Mapオブジェクトを引数にとり，必要な処理を加えて戻り値として返します．地図描画エンジンがエンジン固有のオブジェクトを生成した際には，上記の例のようにmap.originalに設定してくさい（必須ではありません）</p>
+<blockquote>※すなわち，マップ生成関数はMapオブジェクト自身を生成しているわけではありません．しかし，Mapオブジェクトの中心的な機能がここで実装され，地図描画エンジン固有のマップオブジェクトも生成されますのでこう呼んでいます．</blockquote>
+<p>　以下は，Mapオブジェクトにタイルレイヤーを生成するメソッド _tileLayer() を追加する例です．この例のように，地図描画エンジンで追加すべきメソッドはすべてアンダーバー&quot;_&quot;で始める規則になっています．なお，アンダーバーをつけない同名のメソッドがMapオブジェクトに存在することも多いですが，引数の仕様等が若干異なるので注意してください．</p>
+<pre>        Smap.engine.myleaflet = function( map ) {
+
+                map.original = new L.Map( map.owner, {
+
+                        ...
+
+                } );
+
+                map._tileLayer = function( aLayer ) {
+
+                        aLayer.original = new L.TileLayer( aLayer.url );
+
+                        for ( var key in aLayer ) {
+                                if ( aLayer.url.indexOf( '{' + key + '}' ) &gt;= 0 ) {
+                                        aLayer.original.options[ key ] = aLayer[ key ]; 
+                                }
+                        };
+
+                        aLayer.original.addTo( map.original );
+                }
+
+                ...
+
+                return map;
+        };
+</pre>
+<h2><a name="map" id="map">Map</a></h2>
+<p>　マップ生成関数が返すオブジェクトでは，必要に応じて以下のプロパティおよびメソッドを設定してください．</p>
+<h4>・プロパティ</h4>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>original</td>
+      <td>Object&nbsp;</td>
+      <td>なし</td>
+      <td>地図描画エンジンが生成するオブジェクトがあれば設定</td>
+    </tr>
+  </tbody>
+</table>
+<h4>・メソッド</h4>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>_on( type, handler )</td>
+      <td>String, Function&nbsp;</td>
+      <td>this&nbsp;</td>
+      <td>typeで指定したイベントに，handlerで指定したイベ関数を登録<br>
+      未知のイベントタイプについては，可能な場合は，元のとなる地図描画ライブラリのオブジェクトのイベントハンドラにそのまま渡してください．<br>
+      _addEventLlistener(やaddEventListener)メソッドを地図描画エンジン側で実装する必要はありません．プラットフォーム内でこの_on（）メソッドへ読み替えられます．</td>
+    </tr>
+    <tr>
+      <td>_addBase（ layer ）</td>
+      <td>Layer&nbsp;</td>
+      <td>Layer&nbsp;</td>
+      <td>指定したレイヤーを背景地図に追加します．&nbsp;</td>
+    </tr>
+    <tr>
+      <td>_image( layer )</td>
+      <td>Layer&nbsp;</td>
+      <td>なし&nbsp;</td>
+      <td>地図画像レイヤーを追加します．&nbsp;</td>
+    </tr>
+    <tr>
+      <td>_addOverlay( layer )</td>
+      <td>Layer</td>
+      <td>Layer</td>
+      <td>オーバーレイレイヤーを追加<br>
+      引数にはMap.layer()メソッドで生成されたLayerオブジェクトが渡されます．</td>
+    </tr>
+    <tr>
+      <td>_polyline( polyline )</td>
+      <td>Polyline&nbsp;</td>
+      <td>なし&nbsp;</td>
+      <td>ポリラインオブジェクトを追加します．&nbsp;</td>
+    </tr>
+    <tr>
+      <td>_popup( popup )</td>
+      <td>Popup</td>
+      <td>Object</td>
+      <td>指定した位置にポップアップウィンドウを追加</td>
+    </tr>
+    <tr>
+      <td>_layerControl( show )&nbsp;</td>
+      <td>Boolean&nbsp;</td>
+      <td>なし</td>
+      <td>レイヤーコントロールを表示（ showがtrueのとき ）または非表示( showがfalseのとき ）&nbsp;</td>
+    </tr>
+    <tr>
+      <td>_marker( marker )&nbsp;</td>
+      <td>Marker&nbsp;</td>
+      <td>なし</td>
+      <td>マーカーオブジェクトを生成します</td>
+    </tr>
+    <tr>
+      <td>_removeMareker()</td>
+      <td>なし</td>
+      <td>なし&nbsp;</td>
+      <td>最後に追加したマーカーを削除&nbsp;</td>
+    </tr>
+    <tr>
+      <td>_removeOverlay( layer )</td>
+      <td>Layer</td>
+      <td>なし</td>
+      <td>指定したオーバーレイレイヤーを削除<br>
+      引数を省略すると最後に追加したオーバーレイレイヤが削除されます．&nbsp;</td>
+    </tr>
+    <tr>
+      <td>_removelPopup()</td>
+      <td>なし&nbsp;</td>
+      <td>なし</td>
+      <td>最後に追加したポップアップを削除&nbsp;</td>
+    </tr>
+    <tr>
+      <td>_tileLayer( layer )</td>
+      <td>Layer</td>
+      <td>Layer&nbsp;</td>
+      <td>layer引数をもとに実際の描画機能を持ったLayerオブジェクトを生成<br>
+      layer引数には，デフォルトの処理を実装したものが渡されます．<br>
+      外部地図描画ライブラリのオリジナルLayerオブジェクトがある場合は，layer.originalに設定します．</td>
+    </tr>
+    <tr>
+      <td>_removeBase( layer )</td>
+      <td>Layer</td>
+      <td>なし&nbsp;</td>
+      <td>指定したレイヤーをベースマップから削除します</td>
+    </tr>
+    <tr>
+      <td>_removeImage( image )</td>
+      <td>Layer</td>
+      <td>なし</td>
+      <td>指定した画像レイヤーを削除します．</td>
+    </tr>
+    <tr>
+      <td>_removePolyline( polyline )</td>
+      <td>Polyline</td>
+      <td>なし</td>
+      <td>指定したポリラインを削除します． </td>
+    </tr>
+    <tr>
+      <td>_scaleControl( show )</td>
+      <td>Boolean</td>
+      <td>なし</td>
+      <td>スケールコントロールを表示（ showがtrueのとき）または非表示( showがfalseのとき）</td>
+    </tr>
+    <tr>
+      <td>_setBase( layer )</td>
+      <td>Layer</td>
+      <td>Layer&nbsp;</td>
+      <td>背景レイヤーをlayerに変更<br>
+すでに背景として登録されているもののみが指定できます<br>
+      layerを省略すると，現在表示されている背景レイヤーを返します</td>
+    </tr>
+    <tr>
+      <td>_setBounds( bbox )&nbsp;</td>
+      <td>[LatLng, LatLng]</td>
+      <td>[LatLng, LatLng] | null</td>
+      <td>南西および北西の緯度経度を指定して，その範囲が収まりかつ最大になるように描画位置と範囲を変更，最終的な範囲を取得．<br>
+      boundsは省略することができ，その場合は現在の範囲が返されます<br>
+      マップエンジンの状態により情報取得に失敗することがあり，その場合はnulｌを返します．</td>
+    </tr>
+    <tr>
+      <td>_setCenter( latLng )</td>
+      <td>LatLng</td>
+      <td>LatLng</td>
+      <td>地図の中心を，latLngで指定した地理上の位置に変更することを試み，最終的な地理上の位置を取得．<br>
+      centerは省略することができ，省略すると現在の中心位置が返されます．</td>
+    </tr>
+    <tr>
+      <td>_setDraggable( draggable )</td>
+      <td>Boolean</td>
+      <td>なし</td>
+      <td>マウスで地図をドラッグ可能にするか</td>
+    </tr>
+    <tr>
+      <td>_setHf( f )</td>
+      <td>Number</td>
+      <td>Number</td>
+      <td>高さ誇張係数を指定<br>
+      fは省略でき，省略すると現在の誇張係数が返されます．</td>
+    </tr>
+    <tr>
+      <td>_setView( view,<br>
+      　options )</td>
+      <td>Object,<br>
+Object</td>
+      <td>Object</td>
+      <td>地図の中心位置とズームレベルを同時に設定します．<br>
+      引数は，{ centetr: LatLng, zoom: Number }で指定し，フィールドが省略された場合は現在の値となります．引数自体を省略すると現在の表示設定を返します．<br>
+      optionsに{ animate: false }を指定するとアニメーションを抑止します．<br>
+      デフォルトではsetCenter()とsetZoom()を使って動作しますが，地図描画園エンジンが専用のメソッドを持つ場合は，このメソッドを実装することにより利用できます．</td>
+    </tr>
+    <tr>
+      <td>_setScale( scale,<br>
+      　options )</td>
+      <td>Number,<br>
+      Object</td>
+      <td>Nmber</td>
+      <td>スケール(1ピクセルあたりのメートル)を設定することを試み，最終的なスケールを取得<br>
+      １つの地図描画エンジンでは，_setScaleか_setZoomのいずれかをじっそするだけで構いません．&nbsp;</td>
+    </tr>
+    <tr>
+      <td>_setZoom( zoom,<br>
+      　options )</td>
+      <td>Number,<br>
+      Object</td>
+      <td>Number</td>
+      <td>ズームレベルをzoomに変更することを試み，最終的なズームレベルを取得<br>１つの地図描画エンジンでは，_setScaleか_setZoomのいずれかをじっそするだけで構いません．<br>
+      zoomに実数が渡される可能性があります．実装上は四捨五入するなどして整数のみを扱うだけでも構いません．</td>
+    </tr>
+    <tr>
+      <td>_startLocate( params )</td>
+      <td>Object</td>
+      <td>this&nbsp;</td>
+      <td>GPS等による現在位置取得を開始します</td>
+    </tr>
+    <tr>
+      <td>_stopLocate()</td>
+      <td>なし</td>
+      <td>this</td>
+      <td>GPS等による現在位置取得を中止します</td>
+    </tr>
+    <tr>
+      <td>_move( dx,<br>
+      　dy,<br>
+      　dz )</td>
+      <td>Number,&nbsp;<br>
+      Number,<br>
+      Number</td>
+      <td>なし</td>
+      <td>地図をx軸方法，y軸方向, z軸方向にそれぞれdx, dy, dzピクセルずつ動かします．<br>
+      </td>
+    </tr>
+    <tr>
+      <td>_roll( s,<br>
+      　t )</td>
+      <td>Number,<br>Number</td>
+      <td>なし</td>
+      <td>注視点を中心に，水平方向にs, 鉛直方向にt回転させます．</td>
+    </tr>
+    <tr>
+      <td>_ｒollCamera( s,<br>
+      　t )</td>
+      <td>Number,<br>Number</td>
+      <td>なし</td>
+      <td>カメラを中心に，水平方向にs, 鉛直方向にt回転させます</td>
+    </tr>
+    <tr>
+      <td>_near( dz )</td>
+      <td>Number</td>
+      <td>なし</td>
+      <td>カメラを地図に近づけ(負の時は離れさせ）ます．<br>
+      dzは相当するズームレベルの差を指定します．<br>
+      デフォルトでは内部変数に値を蓄積させ，1を超えたとき（または-1を下回ったとき）にズームレベルを変更します．この動作を変えたいときはこのメソッドを実装します．<br>
+      <font color="#ff0000">（dzの考え方が_move()と異なりますので注意してください）</font></td>
+    </tr>
+  </tbody>
+</table>
+<h2><a name="layer" id="layer">Layer</a></h2>
+<p>　Mapオブジェクトの_tileLayer()メソッドや_addImage()メソッドが返すLayerオブジェクトでは，以下のプロパティおよびメソッドを必要に応じて実装します．</p>
+<h4>・プロパティ</h4>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>original</td>
+      <td>Object</td>
+      <td>無し</td>
+      <td>外部地図描画ライブラリが提供するオリジナルのレイヤーオブジェクト</td>
+    </tr>
+  </tbody>
+</table>
+<h4>・メソッド</h4>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>_redraw()</td>
+      <td>なし</td>
+      <td>なし</td>
+      <td>レイヤーを再描画します</td>
+    </tr>
+    <tr>
+      <td>_set( key, value )</td>
+      <td>String, Eney</td>
+      <td>Eney</td>
+      <td>レイヤーのプロパティをセットし，最終的な値を取得します．<br>
+      valueは省略でき，省略すると現在の値のみが返されます．<br>
+      この関数内でredraw()を呼ぶ必要はありません．<br>
+      この関数は，Layerオブジェクのset()メソッドで未知のプロパティが設定されたときに呼び出されます．</td>
+    </tr>
+    <tr>
+      <td>_setOpacity( opacity )&nbsp;</td>
+      <td>Number</td>
+      <td>Number&nbsp;</td>
+      <td>不透明度を設定し，最終的な不透明度を取得<br>
+      opacityは省略でき，省略すると現在の値が返されます．</td>
+    </tr>
+    <tr>
+      <td>_setVisibility( visibility )</td>
+      <td>Boolean</td>
+      <td>Boolean</td>
+      <td>レイヤーの表示・非表示をセットし，最終的な値を取得<br>
+      vsibilityは省略でき，省略すると現在の状態が返されます．</td>
+    </tr>
+  </tbody>
+</table>
+<h2><a name="marker" id="marker">Marker</a></h2>
+<p>　Map._marker()が返すMarkerオブジェクトでは，以下のメソッドを必要に応じて実装します．</p>
+<h4>・メソッド</h4>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>_closePopup()&nbsp;</td>
+      <td>なし</td>
+      <td>なし&nbsp;</td>
+      <td>ポップアップウィンドウを閉じます &nbsp;</td>
+    </tr>
+    <tr>
+      <td>_openPopup()&nbsp;</td>
+      <td>なし</td>
+      <td>なし</td>
+      <td>ポップアップウィンドウを表示します</td>
+    </tr>
+    <tr>
+      <td>_setLatLng( latLng )</td>
+      <td>LatLng</td>
+      <td>LatLng&nbsp;</td>
+      <td>表示する位置を変更し，最終的な位置を返します．<br>
+      引数は省略するできます．</td>
+    </tr>
+    <tr>
+      <td>_setOpacity( opacity )&nbsp;</td>
+      <td>Number</td>
+      <td>Number&nbsp;</td>
+      <td>不透明度を設定し，最終的な不透明度を返します．<br>
+      opacityは省略でき，省略すると現在の値が返されます．</td>
+    </tr>
+    <tr>
+      <td>_setPopup( popup )</td>
+      <td>String</td>
+      <td>String</td>
+      <td>ポップアップで表示するhtml文字列を設定します．<br>
+引数は省略することができ，省略すると現在設定されている文字列を返します</td>
+    </tr>
+    <tr>
+      <td>_setVisibility( visibility )</td>
+      <td>Boolean</td>
+      <td>Boolean</td>
+      <td>レイヤーの表示・非表示をセットし，最終的な値を返します．<br>
+      vsibilityは省略でき，省略すると現在の状態が返されます．</td>
+    </tr>
+  </tbody>
+</table>
+<h2><a name="polyline" id="polyline">Polyline</a></h2>
+<p>　Map._addPolyline()が返すPolylineオブジェクトでは，以下のプロパティおよびメソッドを必要に応じて実装します．</p>
+<h4>・プロパティ</h4>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>original</td>
+      <td>Object</td>
+      <td>無し</td>
+      <td>外部地図描画ライブラリが提供するオリジナルのポリラインオブジェクト</td>
+    </tr>
+  </tbody>
+</table>
+<h4>・メソッド</h4>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>_addLatLng( latLng )</td>
+      <td>LatLng&nbsp;</td>
+      <td>なし</td>
+      <td>地理座標を追加します．</td>
+    </tr>
+    <tr>
+      <td>_on( type,<br>
+      　handler )&nbsp;</td>
+      <td>String,<br>
+      Function</td>
+      <td>なし</td>
+      <td>イベントリスナーを登録します．&nbsp;</td>
+    </tr>
+    <tr>
+      <td>_setLatLngs( latLngs )</td>
+      <td>[ LatLings, ... ]&nbsp;</td>
+      <td>なし</td>
+      <td>地理座標の配列を設定します．</td>
+    </tr>
+    <tr>
+      <td>_setVisibility( visibility )</td>
+      <td>Boolean</td>
+      <td>Boolean</td>
+      <td>ポリラインの表示・非表示をセットし，最終的な値を取得します．<br>
+      vsibilityは省略でき，省略すると現在の状態が返されます．</td>
+    </tr>
+  </tbody>
+</table>
+<h2><a name="controller" id="controller">コントローラ</a></h2>
+<p>　独自のコントローラを実装するには，Controllerオブジェクトを返す関数を，「Smap.controller.コントローラ名」にセットします．この名前規則に従うことにより，Map.addControle(
+'コントローラ名' ) でコントローラに追加できるようになります．<br>
+　コントローラに関しては，S-mapであらかじめオブジェクトを生成する必要はありません．任意のオブジェクトに，プロパティやメソッドを適宜実装してください．</p>
+<h4>・プロパティ</h4>
+<table border="1" cellspacing="0" style="font-family: 'MS PGothic'; letter-spacing: normal; orphans: auto; text-indent: 0px; text-transform: none; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px;">
+  <tbody>
+    <tr>
+      <th>プロパティ</th>
+      <th>型</th>
+      <th>デフォルト</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>active</td>
+      <td>Boolean</td>
+      <td>なし</td>
+      <td>コントローラを有効にするか否か</td>
+    </tr>
+    <tr>
+      <td>id</td>
+      <td>String</td>
+      <td>なし</td>
+      <td>コントローラー名．'gamepad'または'leap'</td>
+    </tr>
+    <tr>
+      <td>rollSpeed</td>
+      <td>Number</td>
+      <td>なし</td>
+      <td>回転速度，1秒あたりの回転ラジアン角</td>
+    </tr>
+    <tr>
+      <td>rollAxisSpeed</td>
+      <td>Number</td>
+      <td>なし</td>
+      <td>回転速度スティック用，1秒あたりの回転ラジアン角</td>
+    </tr>
+    <tr>
+      <td>nearSpeed</td>
+      <td>Number</td>
+      <td>なし</td>
+      <td>近づいたり離れたりする速度，1秒あたりのズームレベル相当</td>
+    </tr>
+    <tr>
+      <td>moveSpeed</td>
+      <td>Number</td>
+      <td>なし</td>
+      <td>移動速度，1秒あたりのピクセル数</td>
+    </tr>
+    <tr>
+      <td>moveAxisSpeed</td>
+      <td>Number</td>
+      <td>なし</td>
+      <td>移動速度スティック用，1秒あたりのピクセル数</td>
+    </tr>
+  </tbody>
+</table>
+<h4>・メソッド</h4>
+<table border="1" cellspacing="0">
+  <tbody>
+    <tr>
+      <th>メソッド</th>
+      <th>引数</th>
+      <th>戻り値</th>
+      <th>説明</th>
+    </tr>
+    <tr>
+      <td>check()</td>
+      <td>Number</td>
+      <td>なし</td>
+      <td>Mapオブジェクト内のループの中から呼び出されます．<br>
+      コントローラの状態が変化があった場合はMapの状態変更用メソッド(near, move, roll, rollCamera )をコールして状態を変更してください</td>
+    </tr>
+  </tbody>
+</table>
+<h2><a name="geocoder" id="geocoder">ジオコーダ</a></h2>
+<p>　ジオコーダは，通常の使用法でもgeocode()メソッドをオーバーライドすることにより独自ジオコーダを作成，利用することができます．<br>
+　さらに，新しいGeocoder()オブジェクトを返す関数を実装して，Smap.geocoder.ジオコーダ名にセットすると，Smap.geocoder( ジオコーダ名 )で取得して利用できるようになります．</p>
+<hr>
+<p align="center">2015年7月21日更新</p>
+</body>
+</html>

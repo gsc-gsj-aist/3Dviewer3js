@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<!-- leaflet210_simple.html, S-mapサンプル - マウス位置のピクセル取得
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - マウス位置のピクセル取得</title>
+	<style>
+body { margin:0px; }
+#map {
+	position: absolute;
+	top: 100px; bottom: 0px; left: 0px; right: 0px;
+}
+h1 { font-size: 16pt; padding: 4px; margin: 0px; }
+div { padding: 2px; }
+	</style>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>S-mapサンプル - マウス位置のピクセル取得</h1>
+	<div id="out1"></div>
+	<div id="out2"></div>
+	<div id="center"></div>
+	<div id="map"></div>
+	<script>
+
+'use strict';
+
+( function() {
+
+	var
+		map,
+		tileLayer,
+		imageLayer;
+
+	map = Smap.map( {
+		owner: 'map',
+		center: { lat: 36, lng: 140 },
+		zoom: 10,
+		minZoom: 5,
+		maxZoom: 13
+	} );
+
+	tileLayer = map.addOverlay( {
+	    url: 'https://gbank.gsj.jp/seamless/tilemap/detailed/g/{z}/{y}/{x}.png',
+    	title: 'シームレス地質図',
+	    attribution: 'AIST GSJ',
+    	attribution_url: 'https://gbank.gsj.jp/seamless/',
+	    minZoom: 5,
+	    maxZoom: 13,
+    	opacity: 0.7,
+	} );
+
+	imageLayer = map.addOverlay( {
+	    url: '../img/5440d.png',
+	    bounds: [ [ 36, 140 ], [ 36.666667, 141 ] ],
+	} );
+
+	map.on( 'click', function( event ) {
+		var
+			ll = event.latLng,
+			p1 = tileLayer.getPixelRGB( ll, map.setZoom() ),
+			p2 = imageLayer.getPixelRGB( ll, map.setZoom() );
+
+		Smap.promiseFinishing( p1, p2 ).then( function( data ) {
+			var
+				s = '<h3>RGB整数値</h3>',
+				d0 = ( data[0] ) ? data[0] : '------',
+				d1 = ( data[1] ) ? data[1] : '------';
+
+			s += 'tile layer : ' + d0 + '<br /> image layer : ' + d1;
+			map.addPopup( ll, s );
+		} );
+	} );
+/*
+	map.on( 'mousemove', function( event ) {
+		function dataToStr( data ) {
+			return ( data ) ? 'RGB: ' + data[0] + ', ' + data[1] + ', ' + data[2] : '------';
+		}
+		tileLayer.getPixel( event.latLng, map.setZoom() ).then( function( d ) {
+			document.getElementById( 'out1' ).innerHTML = 'tile layer : ' + dataToStr( d );
+		}, function( err ) {
+			// タイルが無いとき
+			document.getElementById( 'out1' ).innerHTML = 'tile layer : -------';
+		} );
+		imageLayer.getPixel( event.latLng, map.setZoom() ).then( function( d ) {
+			document.getElementById( 'out2' ).innerHTML = 'image layer : ' + dataToStr( d );
+		} );
+	} );
+*/
+	map.on( 'move', function( event ) {
+		var
+			c = map.setCenter(),
+			s = 'Center: ' + c.lat.toFixed( 4 ) + ', ' + c.lng.toFixed( 4 );
+		document.getElementById( 'center' ).innerHTML = s;
+	} );
+
+} )();
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!-- 580_promiseSync.html, S-mapサンプル - 即時成功するプロミス
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+　作成中
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - 即時成功するプロミス</title>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>即時成功するプロミス</h1>
+	結果1: <span id="out1"></span><br />
+	結果2: <span id="out2"></span><br />
+	<script>
+
+'use strict';
+
+( function() {
+
+	Smap.promise( function( resolve, reject ) {
+		resolve( '(結果その1)' );
+	} ).then( function( data ) {
+		document.getElementById( 'out1' ).innerHTML = data;
+		return( '(結果その2)' );
+	} ).then( function( data ) {
+		document.getElementById( 'out2' ).innerHTML = data;
+	} );;
+
+} )();
+
+	</script>
+</body>
+</html>

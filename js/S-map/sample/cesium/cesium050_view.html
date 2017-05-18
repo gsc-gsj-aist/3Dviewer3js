@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<!-- cesium050_minimum.html, S-mapサンプル - センター，範囲，ズームを設定・取得
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - センター，ズームを操作</title>
+	<style>
+html, body { margin: 0px; width: 100%; height: 100% }
+#map { width: 600px; height: 400px }
+	</style>
+	<link rel="stylesheet" href="http://cesiumjs.org/releases/1.24/Widgets/widgets.css"/>
+	<script src="http://cesiumjs.org/releases/1.24/Cesium.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<button id="tokyo">東京を表示</button>
+	<button id="mito">20万水戸の範囲を表示</button>
+	<span id="output"></span><br />
+	<div id="map"></div>
+	<script>
+
+'use strict';
+
+( function() {
+
+	var
+		map = Smap.map( {
+			engine: 'cesium',
+			owner: 'map', 
+			zoom: 5,
+			minZoom: 5,
+			maxZoom: 13,
+	 		center: { lat: 35.3606, lng: 138.7274 }
+		} );
+
+	document.getElementById( 'tokyo'　).addEventListener( 'click', function() {
+//		map.setZoom( 10, { animate: false } );
+
+//		map.setCenter( { lat: 35.6896, lng: 139.6917 }, { animate: false } );
+		map.setCenter( { lat: 35.6896, lng: 139.6917 } );
+//		map.setView( { center: [ 35.6896, 139.6917 ], zoom: 10 }, { animate: false } );
+
+//		map.setView( { center: [ 35.6896, 139.6917 ], zoom: 10 } );
+
+		showInfo();
+	} );
+
+	document.getElementById( 'mito'　).addEventListener( 'click', function() {
+		map.setBounds( [ [ 36, 140], [37, 141] ], { animate: false } );
+//		map.setBounds( { sw: [ 36, 140], ne: [37, 141] } );
+		showInfo();
+	} );
+
+	function showInfo() {
+		var
+			z = map.getZoom(),
+  			ll = map.getCenter(),
+  			bounds = map.getBounds(),
+  			s;
+
+		console.log( ll );
+		s = 'z: ' + z.toFixed( 4 ) + ', center: [ ';
+		s += ll.lat.toFixed( 4 ) + ', ' + ll.lng.toFixed( 4 ) +  '], ';
+		s += 'bounds: [';
+		if ( bounds ) {		// Cesiumは常にnullを返すので以下は実行されない
+	 		s += round4( bounds.sw.lat ) + ', ' + round4( bounds.sw.lng ) + '], [';
+			s += round4( bounds.ne.lat ) + ', ' + round4( bounds.ne.lng ) + ']';
+		} else {
+			s += ' null ]';
+		};
+		document.getElementById( 'output' ).innerHTML = s
+	};
+//	console.log( map.setView() );
+//	console.log( map.setScale() );
+//	console.log( map.setScale( 124 ) );
+//	console.log( Smap.bounds( [ [ 36, 140], [37, 141] ] ) );
+//	console.log( Smap.bounds( { sw: [ 36, 140 ], ne: [ 37, 141 ] } ) );
+//	console.log( Smap.bounds( [ 36, 140], [37, 141] ) );
+//	console.log( Smap.bounds( 36, 140, 37, 141 ) );
+
+} )();
+
+	</script>
+</body>
+</html>

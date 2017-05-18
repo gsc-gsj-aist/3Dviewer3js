@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<!-- 570_promiseUtil.html, S-mapサンプル - プロミスユーティリティ
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - プロミスユーティリティ</title>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>S-mapサンプル - プロミスユーティリティ</h1>
+
+	<h2>ユーティレイティ関数のテスト</h2>
+	<h3>Smap.promise.all() (成功する例)</h3>
+	<div id="out10"></div>
+	<h3>Smap.promise.all() (失敗する例)</h3>
+	<div id="out11"></div>
+
+	<h3>Smap.promise.race() (成功する例)</h3>
+	<div id="out12"></div>
+	<h3>Smap.promise.race() (失敗する例)</h3>
+	<div id="out13"></div>
+
+	<h3>Smap.promise.finishing() (成功する例)</h3>
+	<div id="out14"></div>
+
+	<script>
+
+'use strict';
+
+( function() {
+
+	var
+		promise2,
+		imgsrc = '../img/5440d.png',
+		imgerr = 'error';
+		
+
+	function loadImage( src ) {
+		var
+			promise;
+
+		promise = Smap.promise( function( resolve, reject ) {
+			var
+				img = new Image();
+
+			img.onload = function() {
+				resolve( this );						// 成功時にはresolve()をコール
+			};
+			img.onerror = function( error ) {
+				reject( new Error( ' image error' ) );	// 失敗時にはreject()をコール
+			}
+			img.src = src;
+		} );
+		return promise;
+	}
+
+	// 1秒後に成功となるプロミスの生成
+	promise2 = Smap.promise( function( resolve, reject ) {
+		setTimeout( function(){
+			resolve( 'timeout' );
+		}, 1000 );
+	} );
+
+	function showTest3( src, divId ) {
+		var
+			out = document.getElementById( divId );
+
+		Smap.promise.all( [ loadImage( src ), promise2 ] ).then( function( value ){
+			out.innerHTML = '成功: ' + value;
+		}, function( error ){
+			out.innerHTML = '失敗: ' + error;
+		} );
+	}
+	showTest3( imgsrc, 'out10' );
+	showTest3( imgerr, 'out11' );
+
+	function showTest4( src, divId ) {
+		var
+			out = document.getElementById( divId );
+
+		Smap.promise.race( [ loadImage( src ), promise2 ] ).then( function( value ){
+			out.innerHTML = '成功: ' + value;
+		}, function( error ){
+			out.innerHTML = '失敗: ' + error;
+		} );
+	}
+	showTest4( imgsrc, 'out12' );
+	showTest4( imgerr, 'out13' );
+
+
+	function showTest5( src, divId ) {
+		var
+			out = document.getElementById( divId );
+
+		Smap.promise.finishing( [ loadImage( src ), promise2 ] ).then( function( value ){
+			out.innerHTML = '成功: ' + value;
+		} );
+	}
+	showTest5( imgsrc, 'out14' );
+
+} )();
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="GENERATOR" content="JustSystems Homepage Builder Version 20.0.3.0 for Windows">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link href="common.css" rel="stylesheet" type="text/css">
+<title>S-map (試験公開)</title>
+</head>
+<body>
+
+<div id="header">
+<table align="center">
+<tr>
+<td class="select">　Home　</td>
+<td><a href="quickstart.html">クイックスタート</a></td>
+<td><a href="api.html">　API　</a></td>
+<td><a href="explanation.html">　解説　</a></td>
+<td><a href="extension.html">拡張ガイド</a></td>
+<td><a href="update.html">更新履歴</a></td>
+<tr/>
+</table>
+</div>
+
+<h1>S-map</h1>
+<p>　S-mapは，2015年5月に公開された20万分の1日本シームレス地質図新ビューアのために作成されたJavaScript地図描画ライブラリです．<br>
+</p>
+<div align="center">
+  <table cellspacing="4">
+    <tbody>
+      <tr>
+        <td>開発版</td>
+        <td>0.2.3dev</td>
+        <td>2016-12-08</td>
+        <td><font size="4"><a href="http://gsj-seamless.jp/labs/smap/0.2.3dev/smap-0.2.3.zip">↓　ダウンロード</a></font></td>
+        <td><font size="4">
+<a href="http://gsj-seamless.jp/labs/smap/0.2.3dev/smap.js">
+http://gsj-seamless.jp/labs/smap/0.2.3dev/smap.js</a><br>
+        </font></td>
+      </tr>
+      <tr>
+        <td><b>最新安定版</b></td>
+        <td><b>0.2.2</b></td>
+        <td><b>2016-11-30</b></td>
+        <td><b><a href="http://gsj-seamless.jp/labs/smap/smap-0.2.2.zip"><font size="+2">↓　ダウンロード</font></a></b></td>
+        <td><font size="4">
+<a href="http://gsj-seamless.jp/labs/smap/smap.js">
+<b>http://gsj-seamless.jp/labs/smap/smap.js</b></a></font><br />
+        </td>
+      </tr>
+      <tr>
+        <td>旧安定板</td>
+        <td>0.2.1.1</td>
+        <td>2015-07-02</td>
+        <td><a href="http://gsj-seamless.jp/labs/smap/0.2.1.1/smap-0.2.1.1.zip">↓　ダウンロード</a></td>
+        <td align="center"></td>
+      </tr>
+      <tr><td colspan="5" style="font-size: small;">
+※ダウンロードファイルはsmap.js,ソース,ドキュメント,サンプルを含みます</td></tr>
+    </tbody>
+  </table>
+  <!--
+旧版(安定板)<br>
+http://gsj-seamless.jp/labs/smap/0.2.0/smap.js<br />
+	<a href="../0.1.3/gsjmap-0.1.3.zip"><font size="+1">↓　ダウンロード　( version 0.2.0 )<br>
+</font></a></p>
+--></div>
+<blockquote><font color="#ff0000">※S-mapは，2016年12月7日現在，試験公開中です<br>
+※このライブラリのサポートは計画しておりません</font></blockquote>
+<p>　S-mapは，それ自体は地図描画を行う機能は持たず，Leaflet, Cesium等の地図描画ライブラリを呼び出して使用するための地図描画プラットフォームを提供します．このプラットフォームには，独自の地図描画エンジンを作成して組み込むことも可能です．</p>
+<h4>・特徴</h4>
+<ul>
+  <li>タイルレイヤーは動的にタイルを書き換え可能
+  <li>タイルレイヤーから画素情報，凡例情報を取り出す機能を提供
+  <li>地図を画像として出力する機能を提供
+  <li>KMLをサポート
+  <li>Promiseオブジェクトをサポートし，非同期処理が記述しやすい
+  <li>地図描画エンジン，コントロール，コントローラを拡張可能
+</ul>
+<h4>・基本コンセプト</h4>
+<p>　基本的にはMapオブジェクトとLayerオブジェクトを提供します．これらは，いわゆるクラスとしては実装されておらず，生成するための関数が提供されます．生成されたMapオブジェクトやLayerオブジェクトは動的に値を変更できるプロパティを持ち，変更は速やかに描画に反映されます．</p>
+<h4>・データファイルフォーマット</h4>
+<p>　地図上に表示するデータのファイルフォーマットとしては以下を扱います．</p>
+<ul>
+  <li>PNG, GIF, JPEG
+  <li>SVG
+  <li>KML, GeoJSON
+</ul>
+<p>　逆に，BMP，TIFF，SHAPE，DLG，E00は扱わない予定です．TopoJSONは検討中です．<br>
+　これらのデータは，通常はタイルサービス（WMTS, TMS, そのほか）もしくは単独ファイルとして扱います．WFS, WPSには対応しません．</p>
+<h4>・対応地図描画ライブラリ（地図描画エンジン）</h4>
+<p>　S-mapでは，呼び出す地図描画ライブラリを地図描画エンジンと呼んでいます．以下の地図描画ライブラリ/エンジンに対応しています．</p>
+<ul>
+  <li>Leaflet
+  <li>Cesium
+</ul>
+<h4>・ライセンス</h4>
+<p>
+　本ライブラリの著作権は、産業技術総合研究所 地質調査総合センターが保有しています．また，本ライブラリはApache License 2.0 に基づいてライセンスされます．<br />
+　二次利用される場合には，著作権の記述を保持するとともに，改変した場合にはその旨を明記してください．また，いかなる利用に際しても，著作権者及び著作者は責任を負わないものとします．<br />
+<br />
+　ライセンスの詳細は，以下のリンクでご確認ください．<br />
+<ul>
+<li><a href="http://www.apache.org/licenses/">Apache Licenses</a>
+<li><a href="https://ja.osdn.net/projects/opensource/wiki/licenses/Apache_License_2.0">Apache License, Version 2.0 日本語参考訳</a>
+</ul>
+</p>
+<h2>今後の予定</h2>
+<ul>
+  <li>2016年
+  <ul>
+    <li>12月
+    <ul>
+      <li>Leaflet 1.0.2対応
+    </ul>
+    </li>
+    <li>1月
+    <ul>
+      <li>サンプルファイル追加
+      <li>ソース圧縮検討 
+      <li>ドキュメントブラッシュアップ
+    </ul>
+    </li>
+    <li>2月
+    <ul>
+      <li>正式版1.0.0公開</li>
+      <li>GeoJson対応</li>
+    </ul>
+    </li>
+  </ul>
+  </li>
+</ul>
+<hr />
+<p align="center">担当　西岡芳晴 ( y-nishioka@aist.go.jp )<br>
+2016-12-08更新</p>
+</body>
+</html>

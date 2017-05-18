@@ -1,0 +1,22 @@
+.clearfix:after	{
+		content				: ".";
+		display				: block;
+		clear				: both;
+		height				: 0;
+		visibility			: hidden;
+	}
+
+/* For IE7 */
+.clearfix	{
+		min-height			: 1px;
+	}
+
+/* For IE6, MacIE5 */
+* html .clearfix	{
+		height				: 1px;
+		/* For MacIE5 */
+		/*¥*//*/
+		height				: auto;
+		overflow			: hidden;
+		/**/
+	}

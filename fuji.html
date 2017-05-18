@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	
+	<meta charset="utf-8">
+	<title>3D地質図ビューア</title>
+	<meta name="description" content="">
+	<meta name="keywords" content="">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css" />
+	<link rel="stylesheet" href="./css/base.css">
+	<link rel="stylesheet" href="./css/main.css">
+	<link rel="stylesheet" href="./css/subwindow.css">
+	<link rel="stylesheet" href="./css/clearfix.css">
+	
+	<!-- ライブラリ等 -->
+	<script type="text/javascript" src="./js/three.js/build/three.min.js"></script>
+	<script type="text/javascript" src="./js/three.js/examples/js/controls/TrackballControls.js"></script>
+	<script type="text/javascript" src="./js/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="./js/proj4js/dist/proj4.js"></script>
+	<script type="text/javascript" src="./js/Geolib/src/geolib.js"></script>
+	<script type="text/javascript" src="./js/leaflet/leaflet.js"></script>
+	<script type="text/javascript" src="./js/S-map/smap.js"></script>
+	
+	<!-- DOMのサイズ調整関連 -->
+	<script type="text/javascript" src="./js/common/window.js"></script>
+</head>
+<body>
+<header class="clearfix">
+	<h1>3D地質図ビューア</h1>
+	<ul class="clearfix">
+		<li><a href="help/help.html" target="_blank">使い方</a></li>
+	</ul>
+</header>
+<div id="wrapper"></div>
+<nav>
+	<ul class="clearfix">
+		<li class="operation">
+			<div><a href="#" class="openmenu"><img src="img/btn_control.png" width="50" height="50" alt="設定" /></a></div>
+			<form method="get" action="#" class="submenu" id="panel">
+				<div class="title">
+					<img src="img/menu_close.png" class="closeSubmenu" width="30" height="30" alt="メニューを閉じる" />
+					<h2><img src="img/btn_control.png" width="25" height="25" alt="設定" /> <span class="lang">設定</span></h2>
+				</div><!--/div.title-->
+				<div class="block">
+					<h3><span class="lang">地質図不透明度の変更</span></h3>
+					<div><input type="range" name="opacity" min="0" max="100" step="1" class="range" /> <span></span>%</div>
+					<h3><span class="lang">標高の強調表示</span></h3>
+					<div><input type="range" name="zScale" min="1" max="5" step="1" class="range" /> <span></span>倍</div>
+					<h3><span class="lang">ワイヤーフレーム表示</span></h3>
+					<div><input type="checkbox" name="wireframe" /> ワイヤーフレームで表示</div>
+					<h3><span class="lang">水平リセット</span></h3>
+					<div><input type="button" name="horisonReset" value="リセット" /></div>
+					<h3><span class="lang">初期状態に戻す</span></h3>
+					<div><input type="button" name="reset" value="リセット" /></div>
+				</div><!--/div.block-->
+			</form>
+		</li><!--/li.operation-->
+	</ul>
+</nav>
+<div id="subWindow">
+	<div class="smallWindow">
+		<div class="contentArea"></div>
+		<img class="closeSmallWindow" src="img/window_close.png" width="28" height="28" alt="" />
+	</div><!--/div.smallWindow-->
+</div><!--/#subWindow-->
+<div id="copyrights">
+	<ul class="clearfix">
+		<li><a href="http://maps.gsi.go.jp/development/ichiran.html">国土地理院</a></li>
+		<li><a href="https://gbank.gsj.jp/owscontents/contents/miscellaneous_12_detail.html">GSJ</a></li>
+	</ul>
+</div><!--/#subWindow-->
+<script type="text/javascript" src="./js/DEFINITIONS/DEFINITIONS_fuji.js"></script>
+<script type="text/javascript" src="./js/project/project.js"></script>
+<script type="text/javascript" src="./js/project/project.color2elevation.js"></script>
+<script type="text/javascript" src="./js/project/project.getBbox.js"></script>
+<script type="text/javascript" src="./js/project/project.getDimension.js"></script>
+<script type="text/javascript" src="./js/project/project.getImageDataFromCanvas.js"></script>
+<script type="text/javascript" src="./js/project/project.getSynthesizedMap.js"></script>
+<script type="text/javascript" src="./js/project/project.pileUpCanvases.js"></script>
+<script type="text/javascript" src="./js/project/project.pushWMSOverlay.js"></script>
+<script type="text/javascript" src="./js/project/initialize.js"></script>
+</body>
+</html>

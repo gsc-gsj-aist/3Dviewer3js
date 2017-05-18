@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!-- leaflet150_simple.html, S-mapサンプル - KMLレイヤー
+  2016-11-30, 西岡 芳晴 ( NISHIOKA Yoshiharu )
+-->
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<title>S-mapサンプル - KMLレイヤー</title>
+	<style>
+html, body { margin: 0px; width: 100%; height: 100% }
+#map { width: 600px; height: 400px }
+	</style>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
+	<script src="../../smap.js"></script>
+</head>
+<body>
+	<h1>S-mapサンプル - KMLレイヤー</h1>
+	<input type="checkbox" id="volcano" checked="checked">火山</input>
+	<div id="map"></div>
+	<script>
+
+'use strict';
+
+( function() {
+
+	var
+		map = Smap.map( {
+			owner: 'map', 
+			zoom: 5,
+			minZoom: 5,
+			maxZoom: 13,
+	 		center: { lat: 35.3606, lng: 138.7274 },
+//			overlaysプロパティで最初に組み込むこともできます．
+//	 		overlays: [ {
+//				url: '../kml/volcanoes_sakura.kml'
+//	 		} ]
+
+		} );
+	var
+		kml1 = map.add( { url: '../kml/volcanoes_sakura.kml' } );　//火山
+
+	document.getElementById( 'volcano' ).addEventListener( 'click', function( event ) {
+		kml1.setVisibility( this.checked );
+	} );
+
+} )();
+
+	</script>
+</body>
+</html>

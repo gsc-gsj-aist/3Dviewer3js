@@ -1,0 +1,46 @@
+h1 {
+  color: SlateGray;
+  text-shadow: -1px -1px #888;
+}
+h2 {
+  background: #ff9966;
+  background: -moz-linear-gradient(left, #ff9966, #ffcc99 );
+  color: white;
+  width: 800px; 
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 8px 8px 8px rgba(0,0,0,0.4);
+  text-shadow: -1px -1px #888;
+}
+h3 {
+  font-weight: bold;
+  color: black;
+  text-shadow: -1px -1px #888;
+}
+.source {
+  background: LightGray;
+  padding: 4px;
+  margin-left: 40px;
+} 
+.sample {
+  font-weight: bold;
+  margin-left: 40px;
+  margin-bottom: 0px;
+}
+#header { text-align:center; }
+#header table { border-spacing:0px; }
+#header td {
+	width: 110px;
+	background: lightgray;
+	text-align:center;
+	border: outset;
+}
+#header td a {
+	text-decoration: none;
+	color: black;
+}
+#header td.select {
+	background: silver;
+	text-shadow: 1px 1px #eee;
+	border:inset;
+}
