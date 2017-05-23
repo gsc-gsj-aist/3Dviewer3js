@@ -15,7 +15,7 @@ DEFINITIONS.wms = {};
 //WMSのGetMapの定義
 DEFINITIONS.wms.getMap = {};
 //URLの指定（念のためGetMapとGetFeatureInfoで別々のURLを指定できるようにしてある）
-DEFINITIONS.wms.getMap.url = 'https://gbankdev.gsj.jp/ows/miscellaneous_00012?';//末尾に「?」
+DEFINITIONS.wms.getMap.url = 'https://gbank.gsj.jp/ows/miscellaneous_00012?';//末尾に「?」
 //リクエスト用のパラメータ
 //crsは基本的にEPSG:3857を指定する必要がある（背景地図タイル、標高タイルがEPSG:3857）。
 //但し諸事情によりEPSG:4326を使う場合もあり
@@ -49,7 +49,7 @@ DEFINITIONS.baseData = {};
 //標高データの定義
 DEFINITIONS.baseData.elevation = {};
 //PNG標高タイルのURLテンプレート
-DEFINITIONS.baseData.elevation.urlTemplate = 'https://gbankdev.gsj.jp/seamless/elev2/elev/gsi10m/{z}/{y}/{x}.png';
+DEFINITIONS.baseData.elevation.urlTemplate = 'https://gbank.gsj.jp/tiles/elev/gsi10m/{z}/{y}/{x}.png';
 //標高タイルで使用するズームレベル
 DEFINITIONS.baseData.elevation.zoom = 10;
 //背景地図の定義
