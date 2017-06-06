@@ -468,25 +468,25 @@ $( document ).ready(function(){
 									.append(
 											$( document.createElement('iframe') )
 												.attr({ 'src' : url })
-												.on( 'load', function(){
-														//iframeにロードしたbodyが空の場合はno_data表示
-														var body = $( 'body', $(this).contents() ).html();
-														if ( ($.trim(body)).length === 0 ) {
-															$( 'div.contentArea', app.operation.subwindow )
-																.empty()
-																.append(
-																	$( document.createElement('div') )
-																		.css({
-																				'margin' : '0',
-																				'padding' : '20px',
-																				'font-size' : '12px',
-																				'font-weight' : 'bold',
-																				'color' : '#f00'
-																			})
-																		.text( 'No data.' )
-																);
-														}
-													})
+												//.on( 'load', function(){
+												//		//iframeにロードしたbodyが空の場合はno_data表示
+												//		var body = $( 'body', $(this).contents() ).html();
+												//		if ( ($.trim(body)).length === 0 ) {
+												//			$( 'div.contentArea', app.operation.subwindow )
+												//				.empty()
+												//				.append(
+												//					$( document.createElement('div') )
+												//						.css({
+												//								'margin' : '0',
+												//								'padding' : '20px',
+												//								'font-size' : '12px',
+												//								'font-weight' : 'bold',
+												//								'color' : '#f00'
+												//							})
+												//						.text( 'No data.' )
+												//				);
+												//		}
+												//	})
 										);
 								app.operation.subwindow.show();
 							}//if
