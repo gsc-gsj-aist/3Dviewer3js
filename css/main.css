@@ -1,13 +1,28 @@
 @charset "UTF-8";
 
 /* コンテンツ領域 */
-#wrapper{
+#wrapper	{
+		position				: relative;
+	}
+#webgl {
 		margin					: 0;
 		padding					: 0;
 		border					: 0;
-		position				: relative;
 		background-color		: #000;
-}
+	}
+#modal	{
+		position: absolute;
+		top:0;
+		left:0;
+		width:100%;
+		z-index: 100;
+		background-color:rgba(128,128,128,0.5);
+		text-align: center;
+		font-size: 0.8em;
+	}
+#modal img	{
+		margin: 100px 0 10px;
+	}
 
 /* 設定画面内のタイトル */
 h2	{
@@ -105,6 +120,7 @@ nav ul li.operation form.submenu div.block	{
 	}
 /* 各フォーム要素のdiv */
 nav ul li.operation form.submenu div.block div	{
+		margin-bottom			: 5px;
 		margin-left				: 30px;
 	}
 /* input.rangeの幅 */
@@ -153,6 +169,14 @@ nav ul li.operation form.submenu div img.closeSubmenu	{
 		margin						: 0;
 		padding						: 0 5px 0 0;
 	}
+
+/**************************************************************/
+/* URL表示ダイアログボックス関連 */
+/**************************************************************/
+#dialog	{
+		text-align		: center;
+	}
+
 
 /**************************************************************/
 /*
