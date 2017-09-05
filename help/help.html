@@ -36,8 +36,6 @@
 
 	<p class="text-center"><img class="img-rounded img-responsive center-block" src="initial_setting.png" border="0" alt="initial_setting.png" width="777" height="354" />3Dビューアで表示される立体地質図の初期画面</p>
 
-		<div class="pull-right"><img src="side_panel.png" border="0" alt="side_panel.png" width="200" height="354" /><p class="text-center">操作パネル</p></div>
-
 		<h3>視点の変更</h3>
 		<p>マウスによる画面ドラッグ、ホイール操作で視点の移動が可能です (*)。</p>
 
@@ -50,29 +48,50 @@
 		<p>* MacOSの場合、ホイールマウスの設定変更が必要になる場合があります。</p>
 
 		<h3>操作パネルの表示</h3>
-		<p>画面左上の歯車アイコンをクリックすると、操作パネルが表示されます。表示された操作パネル右上の三角アイコンをクリックすると操作パネルが非表示となります。</p>
+		<div class="pull-left"><img src="side_panel.png" border="0" alt="side_panel.png" width="200" height="440" /><p class="text-center">操作パネル</p></div>
+
+		<p>　画面左上の歯車アイコンをクリックすると、操作パネルが表示されます。表示された操作パネル右上の三角アイコンをクリックすると操作パネルが非表示となります。</p>
 
 	<h2>2. 操作パネルのメニュー</h2>
-		<h3>(1) 地質図不透明度の変更</h3>
+
+		<h3>(1) 背景地図の選択</h3>
+
+		<div class="pull-left"><img src="bg_maps.png" border="0" alt="bg_maps.png" width="98" height="86" /></div>
+
+		<p class="clearfix">　背景地図の種類を、プルダウンメニューから選択できます。</p>
+
+		<h3>(2) 地質図不透明度の変更</h3>
 		<p>スライドバー操作で、表示中の地質図の不透明度を変更することが可能です。不透明度の値は0%から100%まで、1%刻みで変更できます。</p>
 
 		<p class="text-center"><img class="img-rounded img-responsive center-block" src="transparency.png" border="0" alt="side_panel.png" width="777" height="354" />地質図不透明度の変更例 (左は不透明度70%、右は不透明度35%)</p>
 
-		<h3>(2) 標高の強調表示</h3>
+		<h3>(3) 背景地図と地質図の合成モード</h3>
+
+		<p class="clearfix">　背景地図と地質図を個別に表示する (通常) か、合成して表示する (乗算) かをプルダウンメニューから選択できます。</p>
+
+		<p class="text-center"><img class="img-rounded img-responsive center-block" src="blende_mode.png" border="0" alt="blende_mode.png" width="777" height="354" />左は「通常」表示、右は「乗算」(合成) 表示。</p>
+
+		<h3>(4) 標高の強調表示</h3>
 		<p>スライドバー操作で、表示中の3D地形の標高を強調表示 (Z軸方向の伸長を変更) することが可能です。強調表示は1倍から5倍まで変更できます。</p>
 
 		<p class="text-center"><img class="img-rounded img-responsive center-block" src="exaggeration.png" border="0" alt="side_panel.png" width="777" height="354" />標高の強調表示の例 (左は1倍、右は3倍)</p>
 
-		<h3>(3) ワイヤーフレーム表示</h3>
+		<h3>(5) ワイヤーフレーム表示</h3>
 		<p>チェックボックスのオンオフにより、3D地形のワイヤーフレーム表示のオンオフを切り替えます。ワイヤーフレーム表示をオンにすることで、微細な起伏の様子がより明瞭になります。</p>
 
 		<p class="text-center"><img class="img-rounded img-responsive center-block" src="wire-frame.png" border="0" alt="side_panel.png" width="777" height="354" />ワイヤーフレーム表示の例 (左は通常表示、右はワイヤーフレーム表示)</p>
 
-		<h3>(4) 水平リセット</h3>
-		<p>マウス操作によって傾斜したZ軸を、鉛直にリセットすることができます。</p>
+		<h3>(6) 自動回転</h3>
+		<p>「地質図を自動で回転させる」のチェックボックスにチェックを入れると、3D地質図を水平方向に自動で回転させることができます。</p>
 
-		<h3>(5) 初期状態に戻す</h3>
+		<h3>(7) 水平からの傾き</h3>
+		<p>「常に水平を維持」のチェックボックスからチェックを外すと、マウス操作によって垂直方向 (Z軸) を傾斜させることができます。一度傾斜した状態を元に戻すには、「リセット」ボタンを押します。</p>
+
+		<h3>(8) 初期状態に戻す</h3>
 		<p>各種の設定を、アプリケーション起動時の表示状態にリセットします。</p>
+
+		<h3>(9) リンク用URLを表示</h3>
+		<p>現在の表示状態を、URL形式で保存することができます。</p>
 
 	<h2>3. クリック地点の属性情報表示</h2>
 	<p>3D地質図上をクリックすると、画面右下に当該地点の地質属性情報を表示します。同時にクリックした地点にピンが表示されます。表示された属性情報ウィンドウの左上の×ボタンをクリックすると、地質属性情報および表示中のピンを消去します。</p>

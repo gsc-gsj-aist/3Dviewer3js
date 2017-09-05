@@ -14,3 +14,7 @@ three.jsで地質図を3D表示し、メタ情報を取得するページのソ�
 ・Proj4js (MIT License)  
 ・GeoLib (MIT License)  
 ・Leaflet (BSD License)  
+・jQuery UI (MIT License)
+
+本ソースコードのライセンスについては、「GitHubアカウント「gsc-gsj-aist」について」をご確認ください。  
+https://github.com/gsc-gsj-aist/About-this-account
