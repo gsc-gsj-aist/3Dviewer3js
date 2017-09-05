@@ -12,6 +12,7 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
 	
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css" />
+	<link rel="stylesheet" href="./js/jquery-ui-themes-1.12.1/themes/dark-hive/jquery-ui.min.css">
 	<link rel="stylesheet" href="./css/base.css">
 	<link rel="stylesheet" href="./css/main.css">
 	<link rel="stylesheet" href="./css/subwindow.css">
@@ -21,6 +22,7 @@
 	<script type="text/javascript" src="./js/three.js/build/three.min.js"></script>
 	<script type="text/javascript" src="./js/three.js/examples/js/controls/TrackballControls.js"></script>
 	<script type="text/javascript" src="./js/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="./js/jquery-ui/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="./js/proj4js/dist/proj4.js"></script>
 	<script type="text/javascript" src="./js/Geolib/src/geolib.js"></script>
 	<script type="text/javascript" src="./js/leaflet/leaflet.js"></script>
@@ -36,7 +38,18 @@
 		<li><a href="help/help.html" target="_blank">使い方</a></li>
 	</ul>
 </header>
-<div id="wrapper"></div>
+<div id="wrapper">
+	<div id="webgl"></div>
+	<div id="modal">
+		<img src="img/loading.gif" alt="Data Loading ..." /><br />
+		Data Loading ...
+	</div>
+</div>
+<div id="dialog" title="3D地質図のURL" style="display:none;">
+	<form action="#" method="get">
+		<div><textarea name="url" cols="40" rows="5"></textarea></div>
+	</form>
+</div>
 <nav>
 	<ul class="clearfix">
 		<li class="operation">
@@ -47,16 +60,34 @@
 					<h2><img src="img/btn_control.png" width="25" height="25" alt="設定" /> <span class="lang">設定</span></h2>
 				</div><!--/div.title-->
 				<div class="block">
+					<h3><span class="lang">背景地図の選択</span></h3>
+					<div>
+						<select name="base"></select>
+					</div>
 					<h3><span class="lang">地質図不透明度の変更</span></h3>
 					<div><input type="range" name="opacity" min="0" max="100" step="1" class="range" /> <span></span>%</div>
+					<h3><span class="lang">背景地図と地質図の合成モード</span></h3>
+					<div>
+						<select name="mode">
+							<option value="norm">通常</option>
+							<option value="multi">乗算</option>
+						</select>
+					</div>
 					<h3><span class="lang">標高の強調表示</span></h3>
-					<div><input type="range" name="zScale" min="1" max="5" step="1" class="range" /> <span></span>倍</div>
+					<div><input type="range" name="ex" min="1" max="5" step="1" class="range" /> <span></span>倍</div>
 					<h3><span class="lang">ワイヤーフレーム表示</span></h3>
-					<div><input type="checkbox" name="wireframe" /> ワイヤーフレームで表示</div>
-					<h3><span class="lang">水平リセット</span></h3>
-					<div><input type="button" name="horisonReset" value="リセット" /></div>
+					<div><input type="checkbox" name="wire" /> ワイヤーフレームで表示</div>
+					<h3><span class="lang">自動回転</span></h3>
+					<div><input type="checkbox" name="autorotation" /> 地質図を自動で回転させる</div>
+					<h3><span class="lang">水平からの傾き</span></h3>
+					<div style="line-height:200%;">
+						<input type="checkbox" name="keephorizon" /> 常に水平を維持<br />
+						<input type="button" name="resethorizon" value="リセット" />
+					</div>
 					<h3><span class="lang">初期状態に戻す</span></h3>
 					<div><input type="button" name="reset" value="リセット" /></div>
+					<h3><span class="lang">リンク用URLを表示</span></h3>
+					<div><input type="button" name="showurl" value="URL表示" /></div>
 				</div><!--/div.block-->
 			</form>
 		</li><!--/li.operation-->
@@ -81,6 +112,8 @@
 <script type="text/javascript" src="./js/project/project.getDimension.js"></script>
 <script type="text/javascript" src="./js/project/project.getImageDataFromCanvas.js"></script>
 <script type="text/javascript" src="./js/project/project.getSynthesizedMap.js"></script>
+<script type="text/javascript" src="./js/project/project.latLngAltToCoord3d.js"></script>
+<script type="text/javascript" src="./js/project/project.mode.js"></script>
 <script type="text/javascript" src="./js/project/project.pileUpCanvases.js"></script>
 <script type="text/javascript" src="./js/project/project.pushWMSOverlay.js"></script>
 <script type="text/javascript" src="./js/project/initialize.js"></script>
