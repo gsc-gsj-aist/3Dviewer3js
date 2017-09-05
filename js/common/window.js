@@ -80,8 +80,10 @@ $( document ).ready(function(){
 			var windowHeight = $( window ).height();
 			var headerHeight = $( 'header' ).height() - 1;
 			var height = windowHeight - headerHeight;
-			$( '#wrapper' ).css({ 'height' : String( height ) + 'px' });
+			$( '#webgl' ).css({ 'height' : String( height ) + 'px' });
 			$( 'nav form' ).css({ 'height' : String( height-1 ) + 'px' });
+			
+			$( '#modal' ).css({ 'height' : String( height ) + 'px' });
 		};
 		resize();
 		$( window ).on( 'orientationchange resize', function(){

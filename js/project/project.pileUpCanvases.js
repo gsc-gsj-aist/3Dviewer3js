@@ -7,10 +7,14 @@
 	@param	float	: foreground image's opacity
 	@return	canvas	: piled up canvas
 */
-project.pileUpCanvases = function ( baseCanvas_, overlayCanvas_, overlayOpacity_ ) {
+//project.pileUpCanvases = function ( baseCanvas_, overlayCanvas_, overlayOpacity_, mode_ ) {
+project.pileUpCanvases = function ( baseCanvas_, overlayCanvas_, overlayOpacity_, modeFunction_ ) {
 	//背景とオーバーレイのimageDataを取得
 	var baseImageData = project.getImageDataFromCanvas( baseCanvas_ );
 	var overlayImageData = project.getImageDataFromCanvas( overlayCanvas_ );
+	
+	//合成方法関数の決定
+	//var synthesisFunction = project.mode[ mode_ ];
 	
 	//返り値用canvasの準備
 	var canvas = document.createElement( 'canvas' );
@@ -29,10 +33,18 @@ project.pileUpCanvases = function ( baseCanvas_, overlayCanvas_, overlayOpacity_
 				imageData.data[idx + 3] = baseImageData.data[idx + 3];
 			} else {
 				//オーバーレイのピクセルが透明でない場合、背景のピクセルとの合成処理
-				imageData.data[idx + 0] = ( 1 - overlayOpacity_ ) * baseImageData.data[idx + 0] + ( overlayOpacity_ ) * overlayImageData.data[idx + 0];
-				imageData.data[idx + 1] = ( 1 - overlayOpacity_ ) * baseImageData.data[idx + 1] + ( overlayOpacity_ ) * overlayImageData.data[idx + 1];
-				imageData.data[idx + 2] = ( 1 - overlayOpacity_ ) * baseImageData.data[idx + 2] + ( overlayOpacity_ ) * overlayImageData.data[idx + 2];
-				imageData.data[idx + 3] = ( 1 - overlayOpacity_ ) * baseImageData.data[idx + 3] + ( overlayOpacity_ ) * overlayImageData.data[idx + 3];
+				//imageData.data[idx + 0] = ( 1 - overlayOpacity_ ) * baseImageData.data[idx + 0] + ( overlayOpacity_ ) * overlayImageData.data[idx + 0];
+				//imageData.data[idx + 1] = ( 1 - overlayOpacity_ ) * baseImageData.data[idx + 1] + ( overlayOpacity_ ) * overlayImageData.data[idx + 1];
+				//imageData.data[idx + 2] = ( 1 - overlayOpacity_ ) * baseImageData.data[idx + 2] + ( overlayOpacity_ ) * overlayImageData.data[idx + 2];
+				//imageData.data[idx + 3] = ( 1 - overlayOpacity_ ) * baseImageData.data[idx + 3] + ( overlayOpacity_ ) * overlayImageData.data[idx + 3];
+				
+				//imageData.data[idx + 0] = synthesisFunction( baseImageData.data[idx + 0], overlayImageData.data[idx + 0], overlayOpacity_ );
+				//imageData.data[idx + 1] = synthesisFunction( baseImageData.data[idx + 1], overlayImageData.data[idx + 1], overlayOpacity_ );
+				//imageData.data[idx + 2] = synthesisFunction( baseImageData.data[idx + 2], overlayImageData.data[idx + 2], overlayOpacity_ );
+				imageData.data[idx + 0] = modeFunction_( baseImageData.data[idx + 0], overlayImageData.data[idx + 0], overlayOpacity_ );
+				imageData.data[idx + 1] = modeFunction_( baseImageData.data[idx + 1], overlayImageData.data[idx + 1], overlayOpacity_ );
+				imageData.data[idx + 2] = modeFunction_( baseImageData.data[idx + 2], overlayImageData.data[idx + 2], overlayOpacity_ );
+				imageData.data[idx + 3] = 255;
 			}//if
 		}//for
 	}//for
