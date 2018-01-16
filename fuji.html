@@ -45,7 +45,7 @@
 		Data Loading ...
 	</div>
 </div>
-<div id="dialog" title="3D地質図のURL" style="display:none;">
+<div id="getUrl" title="3D地質図のURL" style="display:none;">
 	<form action="#" method="get">
 		<div><textarea name="url" cols="40" rows="5"></textarea></div>
 	</form>
@@ -60,34 +60,59 @@
 					<h2><img src="img/btn_control.png" width="25" height="25" alt="設定" /> <span class="lang">設定</span></h2>
 				</div><!--/div.title-->
 				<div class="block">
-					<h3><span class="lang">背景地図の選択</span></h3>
-					<div>
-						<select name="base"></select>
-					</div>
-					<h3><span class="lang">地質図不透明度の変更</span></h3>
-					<div><input type="range" name="opacity" min="0" max="100" step="1" class="range" /> <span></span>%</div>
-					<h3><span class="lang">背景地図と地質図の合成モード</span></h3>
-					<div>
-						<select name="mode">
-							<option value="norm">通常</option>
-							<option value="multi">乗算</option>
-						</select>
-					</div>
-					<h3><span class="lang">標高の強調表示</span></h3>
-					<div><input type="range" name="ex" min="1" max="5" step="1" class="range" /> <span></span>倍</div>
-					<h3><span class="lang">ワイヤーフレーム表示</span></h3>
-					<div><input type="checkbox" name="wire" /> ワイヤーフレームで表示</div>
-					<h3><span class="lang">自動回転</span></h3>
-					<div><input type="checkbox" name="autorotation" /> 地質図を自動で回転させる</div>
-					<h3><span class="lang">水平からの傾き</span></h3>
-					<div style="line-height:200%;">
-						<input type="checkbox" name="keephorizon" /> 常に水平を維持<br />
-						<input type="button" name="resethorizon" value="リセット" />
-					</div>
-					<h3><span class="lang">初期状態に戻す</span></h3>
-					<div><input type="button" name="reset" value="リセット" /></div>
-					<h3><span class="lang">リンク用URLを表示</span></h3>
-					<div><input type="button" name="showurl" value="URL表示" /></div>
+					<dl>
+						<dt>背景地図選択</dt>
+						<dd>
+							<select name="base"></select>
+						</dd>
+						<dt>地質図不透明度</dt>
+						<dd>
+							<input type="range" name="opacity" min="0" max="100" step="1" class="range" /> <span></span>%
+						</dd>
+						<dt class="layers">地質図オプション</dt>
+						<dd class="layers">
+							<input type="button" name="layers" value="オプション選択" />
+						</dd>
+						<dt>地質図合成モード</dt>
+						<dd>
+							<select name="mode">
+								<option value="norm">通常</option>
+								<option value="multi">乗算</option>
+							</select>
+						</dd>
+						<dt class="sections">断面図不透明度</dt>
+						<dd class="sections">
+							<input type="range" name="section" min="0" max="100" step="1" class="range" /> <span></span>%
+						</dd>
+						<dt>標高の強調表示</dt>
+						<dd>
+							<input type="range" name="ex" min="1" max="5" step="1" class="range" /> <span></span>倍
+						</dd>
+						<dt>ワイヤー表示</dt>
+						<dd>
+							<input type="checkbox" name="wire" /> ワイヤー表示オン
+						</dd>
+						<dt>自動回転</dt>
+						<dd>
+							<input type="checkbox" name="autorotation" /> 自動回転オン
+						</dd>
+						<dt>水平維持</dt>
+						<dd>
+							<input type="checkbox" name="keephorizon" /> 水平維持オン
+						</dd>
+						<dt>水平リセット</dt>
+						<dd>
+							<input type="button" name="resethorizon" value="リセット" />
+						</dd>
+						<dt>初期状態に戻す</dt>
+						<dd>
+							<input type="button" name="reset" value="リセット" />
+						</dd>
+						<dt>リンクURL取得</dt>
+						<dd>
+							<input type="button" name="geturl" value="URL表示" />
+						</dd>
+					</dl>
 				</div><!--/div.block-->
 			</form>
 		</li><!--/li.operation-->
@@ -101,8 +126,8 @@
 </div><!--/#subWindow-->
 <div id="copyrights">
 	<ul class="clearfix">
-		<li><a href="http://maps.gsi.go.jp/development/ichiran.html">国土地理院</a></li>
-		<li><a href="https://gbank.gsj.jp/owscontents/contents/miscellaneous_12_detail.html">GSJ</a></li>
+		<li><a href="http://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a></li>
+		<li><a href="https://gbank.gsj.jp/owscontents/contents/miscellaneous_12_detail.html" target="_blank" class="gsjlink">GSJ</a></li>
 	</ul>
 </div><!--/#subWindow-->
 <script type="text/javascript" src="./js/DEFINITIONS/DEFINITIONS_fuji.js"></script>
@@ -110,12 +135,11 @@
 <script type="text/javascript" src="./js/project/project.color2elevation.js"></script>
 <script type="text/javascript" src="./js/project/project.getBbox.js"></script>
 <script type="text/javascript" src="./js/project/project.getDimension.js"></script>
-<script type="text/javascript" src="./js/project/project.getImageDataFromCanvas.js"></script>
-<script type="text/javascript" src="./js/project/project.getSynthesizedMap.js"></script>
+<script type="text/javascript" src="./js/project/project.getImage.js"></script>
 <script type="text/javascript" src="./js/project/project.latLngAltToCoord3d.js"></script>
 <script type="text/javascript" src="./js/project/project.mode.js"></script>
 <script type="text/javascript" src="./js/project/project.pileUpCanvases.js"></script>
-<script type="text/javascript" src="./js/project/project.pushWMSOverlay.js"></script>
+<script type="text/javascript" src="./js/project/project.strToCoord.js"></script>
 <script type="text/javascript" src="./js/project/initialize.js"></script>
 </body>
 </html>
