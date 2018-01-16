@@ -99,7 +99,7 @@ div.tooltip	{
 /* パネル内のformとブロック要素 */
 /**************************************************************/
 /* 設定画面（form）は位置絶対指定でデフォルトは画面外 */
-nav ul li.operation form.submenu	{
+form#panel	{
 		position				: absolute;
 		top						: 0;
 		left					: -280px;
@@ -114,25 +114,31 @@ nav ul li.operation form.submenu	{
 		font-size				: 14px;
 	}
 /* 設定画面内のdiv要素に関する定義 */
-nav ul li.operation form.submenu div.block	{
+form#panel div.block	{
 		border-top				: 1px solid #777;
 		padding					: 5px 10px;
 	}
-/* 各フォーム要素のdiv */
-nav ul li.operation form.submenu div.block div	{
-		margin-bottom			: 5px;
-		margin-left				: 30px;
+/* 1項目1行の設定 */
+form#panel dl	{
+		line-height		: 230%;
 	}
-/* input.rangeの幅 */
-nav ul li.operation form.submenu div.block div input.range	{
-		max-width				: 150px;
+form#panel dl dt	{
+		float			: left;
+		clear: both;
+	}
+form#panel dl dd	{
+		margin-left		: 125px;
+	}
+/* スライダーの幅 */
+form#panel input.range	{
+		width			: 80px;
 	}
 
 /**************************************************************/
 /* 閉じるボタン */
 /**************************************************************/
 /* 設定画面タイトル右の閉じるボタン */
-nav ul li.operation form.submenu div img.closeSubmenu	{
+form#panel div img.closeSubmenu	{
 		float					: right;
 		padding					: 5px;
 		cursor					: pointer;
@@ -171,12 +177,19 @@ nav ul li.operation form.submenu div img.closeSubmenu	{
 	}
 
 /**************************************************************/
+/* オプションレイヤーダイアログボックス関連 */
+/**************************************************************/
+#layers ul li	{
+		line-height		: 200%;
+		list-style		: none;
+	}
+
+/**************************************************************/
 /* URL表示ダイアログボックス関連 */
 /**************************************************************/
 #dialog	{
 		text-align		: center;
 	}
-
 
 /**************************************************************/
 /*

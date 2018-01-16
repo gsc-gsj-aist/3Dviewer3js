@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	
+	<meta charset="utf-8">
+	<title>3D地質図ビューア</title>
+	<meta name="description" content="">
+	<meta name="keywords" content="">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css" />
+	<link rel="stylesheet" href="./js/jquery-ui-themes-1.12.1/themes/dark-hive/jquery-ui.min.css">
+	<link rel="stylesheet" href="./css/base.css">
+	<link rel="stylesheet" href="./css/main.css">
+	<link rel="stylesheet" href="./css/subwindow.css">
+	<link rel="stylesheet" href="./css/clearfix.css">
+	
+	<!-- ライブラリ等 -->
+	<script type="text/javascript" src="./js/three.js/build/three.min.js"></script>
+	<script type="text/javascript" src="./js/three.js/examples/js/controls/TrackballControls.js"></script>
+	<script type="text/javascript" src="./js/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="./js/jquery-ui/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="./js/proj4js/dist/proj4.js"></script>
+	<script type="text/javascript" src="./js/Geolib/src/geolib.js"></script>
+	<script type="text/javascript" src="./js/leaflet/leaflet.js"></script>
+	<script type="text/javascript" src="./js/S-map/smap.js"></script>
+	
+	<!-- DOMのサイズ調整関連 -->
+	<script type="text/javascript" src="./js/common/window.js"></script>
+</head>
+<body>
+<header class="clearfix">
+	<h1>3D地質図ビューア</h1>
+	<ul class="clearfix">
+		<li><a href="help/help.html" target="_blank">使い方</a></li>
+	</ul>
+</header>
+<div id="wrapper">
+	<div id="webgl"></div>
+	<div id="modal">
+		<img src="img/loading.gif" alt="Data Loading ..." /><br />
+		Data Loading ...
+	</div>
+</div>
+<div id="layers" title="地質図オプションの選択" style="display:none;">
+	<form action="#" method="get">
+		<ul></ul>
+	</form>
+</div>
+<div id="getUrl" title="3D地質図のURL" style="display:none;">
+	<form action="#" method="get">
+		<div><textarea name="url" cols="40" rows="5"></textarea></div>
+	</form>
+</div>
+<nav>
+	<ul class="clearfix">
+		<li class="operation">
+			<div><a href="#" class="openmenu"><img src="img/btn_control.png" width="50" height="50" alt="設定" /></a></div>
+			<form method="get" action="#" class="submenu" id="panel">
+				<div class="title">
+					<img src="img/menu_close.png" class="closeSubmenu" width="30" height="30" alt="メニューを閉じる" />
+					<h2><img src="img/btn_control.png" width="25" height="25" alt="設定" /> <span class="lang">設定</span></h2>
+				</div><!--/div.title-->
+				<div class="block">
+					<dl>
+						<dt>背景地図選択</dt>
+						<dd>
+							<select name="base"></select>
+						</dd>
+						<dt>地質図不透明度</dt>
+						<dd>
+							<input type="range" name="opacity" min="0" max="100" step="1" class="range" /> <span></span>%
+						</dd>
+						<dt class="layers">地質図オプション</dt>
+						<dd class="layers">
+							<input type="button" name="layers" value="オプション選択" />
+						</dd>
+						<dt>地質図合成モード</dt>
+						<dd>
+							<select name="mode">
+								<option value="norm">通常</option>
+								<option value="multi">乗算</option>
+							</select>
+						</dd>
+						<dt class="sections">断面図不透明度</dt>
+						<dd class="sections">
+							<input type="range" name="section" min="0" max="100" step="1" class="range" /> <span></span>%
+						</dd>
+						<dt>標高の強調表示</dt>
+						<dd>
+							<input type="range" name="ex" min="1" max="5" step="1" class="range" /> <span></span>倍
+						</dd>
+						<dt>ワイヤー表示</dt>
+						<dd>
+							<input type="checkbox" name="wire" /> ワイヤー表示オン
+						</dd>
+						<dt>自動回転</dt>
+						<dd>
+							<input type="checkbox" name="autorotation" /> 自動回転オン
+						</dd>
+						<dt>水平維持</dt>
+						<dd>
+							<input type="checkbox" name="keephorizon" /> 水平維持オン
+						</dd>
+						<dt>水平リセット</dt>
+						<dd>
+							<input type="button" name="resethorizon" value="リセット" />
+						</dd>
+						<dt>初期状態に戻す</dt>
+						<dd>
+							<input type="button" name="reset" value="リセット" />
+						</dd>
+						<dt>リンクURL取得</dt>
+						<dd>
+							<input type="button" name="geturl" value="URL表示" />
+						</dd>
+					</dl>
+				</div><!--/div.block-->
+			</form>
+		</li><!--/li.operation-->
+	</ul>
+</nav>
+<div id="subWindow">
+	<div class="smallWindow">
+		<div class="contentArea"></div>
+		<img class="closeSmallWindow" src="img/window_close.png" width="28" height="28" alt="" />
+	</div><!--/div.smallWindow-->
+</div><!--/#subWindow-->
+<div id="copyrights">
+	<ul class="clearfix">
+		<li><a target="_blank" href="http://maps.gsi.go.jp/development/ichiran.html">国土地理院</a></li>
+		<li><a target="_blank" href="#" class="gsjlink">GSJ</a></li>
+	</ul>
+</div><!--/#subWindow-->
+
+<script type="text/javascript" src="./js/DEFINITIONS/DEFINITIONS_geotiff.js"></script>
+<script type="text/javascript" src="./js/project/project.js"></script>
+<script type="text/javascript" src="./js/project/project.color2elevation.js"></script>
+<script type="text/javascript" src="./js/project/project.getBbox.js"></script>
+<script type="text/javascript" src="./js/project/project.getDimension.js"></script>
+<script type="text/javascript" src="./js/project/project.getImage.js"></script>
+<script type="text/javascript" src="./js/project/project.latLngAltToCoord3d.js"></script>
+<script type="text/javascript" src="./js/project/project.mode.js"></script>
+<script type="text/javascript" src="./js/project/project.pileUpCanvases.js"></script>
+<script type="text/javascript" src="./js/project/project.strToCoord.js"></script>
+<script type="text/javascript" src="./js/project/initialize.js"></script>
+</body>
+</html>

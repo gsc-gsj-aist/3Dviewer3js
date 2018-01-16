@@ -9,9 +9,17 @@
 */
 //project.pileUpCanvases = function ( baseCanvas_, overlayCanvas_, overlayOpacity_, mode_ ) {
 project.pileUpCanvases = function ( baseCanvas_, overlayCanvas_, overlayOpacity_, modeFunction_ ) {
-	//背景とオーバーレイのimageDataを取得
-	var baseImageData = project.getImageDataFromCanvas( baseCanvas_ );
-	var overlayImageData = project.getImageDataFromCanvas( overlayCanvas_ );
+	
+	var getImageDataFromCanvas = function ( canvas_ ) {
+		var ctx = canvas_.getContext( '2d' );
+		return ctx.getImageData( 0, 0, canvas_.width, canvas_.height );
+	};
+	
+	//ベースとオーバーレイのimageDataを取得
+	//var baseImageData = project.getImageDataFromCanvas( baseCanvas_ );
+	//var overlayImageData = project.getImageDataFromCanvas( overlayCanvas_ );
+	var baseImageData = getImageDataFromCanvas( baseCanvas_ );
+	var overlayImageData = getImageDataFromCanvas( overlayCanvas_ );
 	
 	//合成方法関数の決定
 	//var synthesisFunction = project.mode[ mode_ ];
